@@ -50,6 +50,7 @@ import javafx.scene.ImageCursor;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
@@ -439,6 +440,30 @@ public class PSurfaceFX implements PSurface {
     exceptionHandlerThread.setDaemon(true);
     exceptionHandlerThread.setName("Processing-FX-ExceptionHandler");
     exceptionHandlerThread.start();
+  }
+
+  /** For ProcessingFX: Set the sketch */
+  public void setSketch(PApplet sketch)
+  {
+    this.sketch = sketch;
+  }
+  /** For ProcessingFC: Get the stage */
+  public Stage getStage()
+  {
+    return this.stage;
+  }
+  /** For ProcessingFX: Set the stage */
+  public void setStage(Stage stage)
+  {
+    this.stage = stage;
+  }
+
+
+ /** For ProcessingFX: Set graphics context  */
+  public void setGraphicsContext( GraphicsContext context)
+  {
+     this.fx.setContext(context);
+
   }
 
 

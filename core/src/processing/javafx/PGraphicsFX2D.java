@@ -130,6 +130,12 @@ public class PGraphicsFX2D extends PGraphics {
     return context;
   }
 
+  /** For ProcessingFX: set the javafx.scene.canvas.GraphicsContext */
+  public void setContext(GraphicsContext context)
+  {
+    this.context = context;
+  }
+
 
   //////////////////////////////////////////////////////////////
 
@@ -1376,7 +1382,7 @@ public class PGraphicsFX2D extends PGraphics {
     // when the limit is reached, the least recently used font is removed
     // TODO: this should be based on memory consumtion
     final LinkedHashMap<Key, FontInfo> cache =
-        new LinkedHashMap<Key, FontInfo>(16, 0.75f, true) {
+        new LinkedHashMap<>(16, 0.75f, true) {
       @Override
       protected boolean removeEldestEntry(Map.Entry<Key, FontInfo> eldest) {
         return size() > MAX_CACHE_SIZE;
@@ -1540,7 +1546,7 @@ public class PGraphicsFX2D extends PGraphics {
 
   protected PImage getTintedGlyphImage(PFont.Glyph glyph, int tintColor) {
     if (textFontInfo.tintCache == null) {
-      textFontInfo.tintCache = new LinkedHashMap<Integer, PImage[]>(16, 0.75f, true) {
+      textFontInfo.tintCache = new LinkedHashMap<>(16, 0.75f, true) {
         @Override
         protected boolean removeEldestEntry(Map.Entry<Integer, PImage[]> eldest) {
           return size() > FontInfo.MAX_CACHED_COLORS_PER_FONT;
