@@ -130,7 +130,7 @@ public class PGraphicsFX2D extends PGraphics {
     return context;
   }
 
-  /** For ProcessingFX: set the javafx.scene.canvas.GraphicsContext */
+  /** For Processing-FXML: set the javafx.scene.canvas.GraphicsContext */
   public void setContext(GraphicsContext context)
   {
     this.context = context;

@@ -442,24 +442,24 @@ public class PSurfaceFX implements PSurface {
     exceptionHandlerThread.start();
   }
 
-  /** For ProcessingFX: Set the sketch */
+  /** For Processing-FXML: Set the sketch */
   public void setSketch(PApplet sketch)
   {
     this.sketch = sketch;
   }
-  /** For ProcessingFC: Get the stage */
+  /** For Processing-FXML: Get the stage */
   public Stage getStage()
   {
     return this.stage;
   }
-  /** For ProcessingFX: Set the stage */
+  /** For Processing-FXML: Set the stage */
   public void setStage(Stage stage)
   {
     this.stage = stage;
   }
 
 
- /** For ProcessingFX: Set graphics context  */
+ /** For Processing-FXML: Set graphics context of PGraphicsFX2D this.fx */
   public void setGraphicsContext( GraphicsContext context)
   {
      this.fx.setContext(context);
