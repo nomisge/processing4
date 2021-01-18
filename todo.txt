@@ -1,56 +1,12 @@
-1272 (4.0a3)
-X make changes to get sound and video to prompt on Catalina
-X   also fix for exported applications
-X   added NSCameraUsageDescription and NSMicrophoneUsageDescription to Info.plist
-X   also for exported applications
-X audio and video broken on macOS b/c can't access mic/camera
-X   https://github.com/processing/processing-sound/issues/51
-X 'ant source-jar' target added to core
-X   https://github.com/processing/processing4/issues/118
-X show Tool incompatibilities with a message dialog
-X   clean up a little of the internal error handling there
-X add "var" keyword to highlighting
-X   https://github.com/processing/processing4/issues/114
-X prevent "illegal line" message when loading library with FEFF chars in properties file
-X fix revision number in exported code
-X   https://github.com/processing/processing4/issues/135
-X clean up Export to Application
-X   export should only do 64-bit (and no ARM)
-X   turned off 32-bit and ARM exports
-X   drop '64' from the folder name
-X   export.txt error "big fat lie" spew on export
-X     was including all dll and so files as if they'd been extracted
-X     also several .jar files from other platforms included
-o   the "embed Java" shouldn't be available unless the current platform is selected
-X     changed text to be a little clearer
-X   export.embed_java.for changed to export.include_java
-X   update text to macOS instead of Mac OS X
-X   install Java 11 should link to OpenJDK site
-X   set minimum version on Windows, fix JDK download URL
-o 'Basics' folder always open in examples list
-X   couldn't reproduce on another machine
-X NullPointerException in getSystemZoom() on startup in alpha 2
-X   https://github.com/processing/processing4/issues/143
-X   fix includes Platform cleanup
-X     get rid of editor.laf.vaqua preference (use the laf pref)
-X     move macOS-specific code out of DefaultPlatform and into MacPlatform
+1273 (4.0a4)
 
-contribs
-X Updates and fixes for PDE_pt.properties (Portugese translation)
-X   https://github.com/processing/processing4/pull/133
-X   https://github.com/processing/processing4/pull/134
 
-Sam
-X preproc needs spaces in the size command, per our guidelines
-X   https://github.com/processing/processing4/issues/136
-X   https://github.com/processing/processing4/pull/138
-X Move PdePreprocessIssueException to the test package
-X   https://github.com/processing/processing4/issues/130
-X   https://github.com/processing/processing4/pull/139
+already fixed in 4.x? (confirm/close on release)
+_ HDPI support GNOME desktop
+_   https://github.com/processing/processing/issues/6059
 
-4.0a2
-X automate notarization in the build process
-X   https://github.com/processing/processing4/issues/24
+_ remove the JRE Downloader
+_   https://github.com/processing/processing4/issues/155
 
 _ disable "notifications" prompt on startup for macOS
 _   (we're not posting any notifications, at least for now)
@@ -65,8 +21,7 @@ _   https://www.azul.com/downloads/zulu-community/?version=java-11-lts&os=macos&
 _   OpenGL available but deprecated on Apple Si
 _     https://developer.apple.com/documentation/xcode/porting_your_macos_apps_to_apple_silicon
 
-_ Movie maker .mov not compatible with quicktime player
-_   adding -pix_fmt yuv420p
+_ MovieMaker .mov not compatible with QuicktTime Player
 _   https://github.com/processing/processing/issues/6110
 
 _ getSystemZoom() not available to splash screen
@@ -75,14 +30,12 @@ _   move all platform code out that doesn't require additional setup?
 _   i.e. all the things that rely on preferences can be inited separately (later)
 
 
-already fixed in 4.x? (confirm/close on release)
-_ HDPI support GNOME desktop
-_   https://github.com/processing/processing/issues/6059
-
-
-decisions before release
+decisions before final 4.0 release
 X Shutting off VAqua due to interface ugliness and Contribution Manager freezing
 _   https://github.com/processing/processing4/issues/129
+_   now with a release 9 to cover Big Sur
+_     https://violetlib.org/vaqua/downloads.html
+_   make the final call to remove, or put the libs on download.processing.org
 _ Some 3.x Tools not working because JavaFX isn't on the classpath
 _   https://github.com/processing/processing4/issues/110
 _ Friendly Names for new Sketches (includes UI for switching it back)
@@ -96,20 +49,10 @@ _ can we get rid of pdexEnabled? does it work w/ java tabs?
 
 
 discuss with Andres
-_ Add language support to modes
-_   https://github.com/processing/processing4/pull/14
 _ next video release
 _   https://github.com/processing/processing-video/milestone/1
-_ video totally broken on macOS
-_   https://github.com/processing/processing-video/issues/134
-_   how to fix:
-_     https://github.com/processing/processing-video/issues/134#issuecomment-617301980
-_     beta 4 works better, but only if replacing just the library folder
-_     https://github.com/processing/processing-video/releases
-_     https://github.com/processing/processing-video/releases/download/r6-v2.0-beta4/video-2.0-beta4.zip
-_   could make a script to do this process, but:
-_     1) weird to replace 'library' not the rest
-_     2) why the quarrantine hacks? will downloading a stream work?
+_ Add language support to modes
+_   https://github.com/processing/processing4/pull/14
 
 
 would like to fix
@@ -147,6 +90,8 @@ _ put the reference (and examples?) into .zip files
 _   unzipping the app takes forever
 _   see the 'examples' section below
 _ how are file associations handled in Linux? (for .pde, .psk)
+_ command line complaints
+_   https://github.com/processing/processing/issues/6129
 
 
 before final release

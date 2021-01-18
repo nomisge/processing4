@@ -1,16 +1,8 @@
-1272 (4.0a3)
-X loadJSONObject/Array() now return null if the given file was not found
-X   https://github.com/processing/processing/pull/6081
-X remove zero width no-break space (U+FEFF) character with trim()
-X PShapeOpenGL setAttrib() warning says "setNormal()" instead of "setAttrib()"
-X   https://github.com/processing/processing4/issues/141
-X SVG Export
-X   update Batik to 1.13 (from 1.8)
-X   download it via direct link (don't check into repo)
-X   fixes incompatibilities with org.w3c.dom and Java 11
+1273 (4.0a4)
 
-fixed in 4.x (close/lock these with final 4.0 release)
-_ AppKit errors from P2D/P3D
+
+fixed in 4.x (close/lock these 3.x issues with final 4.0 release)
+X AppKit errors from P2D/P3D
 _   https://github.com/processing/processing/issues/5880
 X Export Application broken in Processing 3.5.4 when using P2D or P3D renderers
 X   may be a JOGL bug, fixed by the 2.4 RC (therefore fixed in 4.x already?)
@@ -19,8 +11,6 @@ _ Profile GL3bc is not available on X11GraphicsDevice
 _   https://github.com/processing/processing/issues/5476
 X Cannot run rotateZ() within the PShape class
 _   https://github.com/processing/processing/issues/5770
-_ size() not working on ubuntu 16 and processing 3.5.3
-_   https://github.com/processing/processing/issues/5912
 
 _ update P2D reference to make clear about drawing order and quality
 _   https://github.com/processing/processing/issues/5880
@@ -31,8 +21,6 @@ _   Linux: https://github.com/processing/processing/issues/5912
 
 _ why does GL flash red when resizing?
 
-_ JDK 11.0.7+ workarounds/hacks in place, fix them
-_   https://github.com/processing/processing4/issues/124
 
 _ Skija bindings
 _   https://github.com/processing/processing4/issues/151
@@ -54,7 +42,7 @@ _   https://github.com/processing/processing/issues/4897
 
 
 api changes
-_ static versions of selectInput/selectOutput/selectFolder in PApplet have been removed
+_ static versions of selectInput/selectOutput/selectFolder removed from PApplet
 _ java.awt.Frame object "frame" removed from PApplet (been warning since 2015)
 X   https://github.com/processing/processing4/issues/54
 _ protected PImage.checkAlpha() now public
