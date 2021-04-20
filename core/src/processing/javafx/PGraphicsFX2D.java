@@ -22,9 +22,6 @@
 
 package processing.javafx;
 
-import com.sun.javafx.geom.Path2D;
-import com.sun.javafx.geom.PathIterator;
-import com.sun.javafx.geom.Shape;
 
 import java.nio.IntBuffer;
 import java.util.HashMap;
@@ -44,6 +41,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.StrokeLineJoin;
+import javafx.scene.shape.Path;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.CubicCurveTo;
+import javafx.scene.shape.QuadCurveTo;
+import javafx.scene.shape.ClosePath;
+import javafx.scene.shape.PathElement;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
@@ -51,19 +55,22 @@ import javafx.scene.transform.Transform;
 
 import processing.core.*;
 
-
 public class PGraphicsFX2D extends PGraphics {
   GraphicsContext context;
 
-  static final WritablePixelFormat<IntBuffer> argbFormat =
-    PixelFormat.getIntArgbInstance();
+  static final WritablePixelFormat<IntBuffer> argbFormat = PixelFormat
+      .getIntArgbInstance();
 
   WritableImage snapshotImage;
 
-  Path2D workPath = new Path2D();
-  Path2D auxPath = new Path2D();
+  Path workPath = new Path();
+
+  Path auxPath = new Path();
+
   boolean openContour;
+
   boolean adjustedForThinLines;
+
   /// break the shape at the next vertex (next vertex() call is a moveto())
   boolean breakShape;
 
@@ -71,11 +78,15 @@ public class PGraphicsFX2D extends PGraphics {
 
   /// coordinates for internal curve calculation
   float[] curveCoordX;
+
   float[] curveCoordY;
+
   float[] curveDrawX;
+
   float[] curveDrawY;
 
   int transformCount;
+
   Affine[] transformStack = new Affine[MATRIX_STACK_DEPTH];
 
 //  Line2D.Float line = new Line2D.Float();
@@ -93,36 +104,27 @@ public class PGraphicsFX2D extends PGraphics {
 //  public boolean strokeGradient;
 //  public Paint strokeGradientObject;
 
-
-
   //////////////////////////////////////////////////////////////
 
   // INTERNAL
 
+  public PGraphicsFX2D() {
+  }
 
-  public PGraphicsFX2D() { }
+  // public void setParent(PApplet parent)
 
+  // public void setPrimary(boolean primary)
 
-  //public void setParent(PApplet parent)
+  // public void setPath(String path)
 
+  // public void setSize(int width, int height)
 
-  //public void setPrimary(boolean primary)
-
-
-  //public void setPath(String path)
-
-
-  //public void setSize(int width, int height)
-
-
-  //public void dispose()
-
+  // public void dispose()
 
   @Override
   public PSurface createSurface() {
     return surface = new PSurfaceFX(this);
   }
-
 
   /** Returns the javafx.scene.canvas.GraphicsContext used by this renderer. */
   @Override
@@ -131,22 +133,18 @@ public class PGraphicsFX2D extends PGraphics {
   }
 
   /** For Processing-FXML: set the javafx.scene.canvas.GraphicsContext */
-  public void setContext(GraphicsContext context)
-  {
+  public void setContext(GraphicsContext context) {
     this.context = context;
   }
-
 
   //////////////////////////////////////////////////////////////
 
   // FRAME
 
-
 //  @Override
 //  public boolean canDraw() {
 //    return true;
 //  }
-
 
   @Override
   public void beginDraw() {
@@ -154,7 +152,6 @@ public class PGraphicsFX2D extends PGraphics {
     resetMatrix(); // reset model matrix
     vertexCount = 0;
   }
-
 
   @Override
   public void endDraw() {
@@ -166,48 +163,33 @@ public class PGraphicsFX2D extends PGraphics {
     }
   }
 
-
-
   //////////////////////////////////////////////////////////////
 
   // SETTINGS
 
+  // protected void checkSettings()
 
-  //protected void checkSettings()
+  // protected void defaultSettings()
 
-
-  //protected void defaultSettings()
-
-
-  //protected void reapplySettings()
-
-
+  // protected void reapplySettings()
 
   //////////////////////////////////////////////////////////////
 
   // HINT
 
-
-  //public void hint(int which)
-
-
+  // public void hint(int which)
 
   //////////////////////////////////////////////////////////////
 
   // SHAPE CREATION
 
+  // protected PShape createShapeFamily(int type)
 
-  //protected PShape createShapeFamily(int type)
-
-
-  //protected PShape createShapePrimitive(int kind, float... p)
-
-
+  // protected PShape createShapePrimitive(int kind, float... p)
 
   //////////////////////////////////////////////////////////////
 
   // SHAPE
-
 
   @Override
   public void beginShape(int kind) {
@@ -215,8 +197,11 @@ public class PGraphicsFX2D extends PGraphics {
     vertexCount = 0;
     curveVertexCount = 0;
 
-    workPath.reset();
-    auxPath.reset();
+    // workPath.getElements().retainAll();
+    workPath.getElements().clear();
+    // workPath.reset();
+    auxPath.getElements().clear();
+    // auxPath.reset();
 
     flushPixels();
 
@@ -226,29 +211,24 @@ public class PGraphicsFX2D extends PGraphics {
     }
   }
 
+  // public boolean edge(boolean e)
 
-  //public boolean edge(boolean e)
+  // public void normal(float nx, float ny, float nz) {
 
-
-  //public void normal(float nx, float ny, float nz) {
-
-
-  //public void textureMode(int mode)
-
+  // public void textureMode(int mode)
 
   @Override
   public void texture(PImage image) {
     showMethodWarning("texture");
   }
 
-
   @Override
   public void vertex(float x, float y) {
     if (vertexCount == vertices.length) {
-      float[][] temp = new float[vertexCount<<1][VERTEX_FIELD_COUNT];
+      float[][] temp = new float[vertexCount << 1][VERTEX_FIELD_COUNT];
       System.arraycopy(vertices, 0, temp, 0, vertexCount);
       vertices = temp;
-      //message(CHATTER, "allocating more vertices " + vertices.length);
+      // message(CHATTER, "allocating more vertices " + vertices.length);
     }
     // not everyone needs this, but just easier to store rather
     // than adding another moving part to the code...
@@ -264,29 +244,23 @@ public class PGraphicsFX2D extends PGraphics {
 
     case LINES:
       if ((vertexCount % 2) == 0) {
-        line(vertices[vertexCount-2][X],
-             vertices[vertexCount-2][Y], x, y);
+        line(vertices[vertexCount - 2][X], vertices[vertexCount - 2][Y], x, y);
       }
       break;
 
     case TRIANGLES:
       if ((vertexCount % 3) == 0) {
-        triangle(vertices[vertexCount - 3][X],
-                 vertices[vertexCount - 3][Y],
-                 vertices[vertexCount - 2][X],
-                 vertices[vertexCount - 2][Y],
-                 x, y);
+        triangle(vertices[vertexCount - 3][X], vertices[vertexCount - 3][Y],
+                 vertices[vertexCount - 2][X], vertices[vertexCount - 2][Y], x,
+                 y);
       }
       break;
 
     case TRIANGLE_STRIP:
       if (vertexCount >= 3) {
-        triangle(vertices[vertexCount - 2][X],
-                 vertices[vertexCount - 2][Y],
-                 vertices[vertexCount - 1][X],
-                 vertices[vertexCount - 1][Y],
-                 vertices[vertexCount - 3][X],
-                 vertices[vertexCount - 3][Y]);
+        triangle(vertices[vertexCount - 2][X], vertices[vertexCount - 2][Y],
+                 vertices[vertexCount - 1][X], vertices[vertexCount - 1][Y],
+                 vertices[vertexCount - 3][X], vertices[vertexCount - 3][Y]);
       }
       break;
 
@@ -300,77 +274,61 @@ public class PGraphicsFX2D extends PGraphics {
         // polygon fill, followed by a series of vertices. But that's a
         // poor method when used with PDF, DXF, or other recording objects,
         // since discrete triangles would likely be preferred.
-        triangle(vertices[0][X],
-                 vertices[0][Y],
-                 vertices[vertexCount - 2][X],
-                 vertices[vertexCount - 2][Y],
-                 x, y);
+        triangle(vertices[0][X], vertices[0][Y], vertices[vertexCount - 2][X],
+                 vertices[vertexCount - 2][Y], x, y);
       }
       break;
 
     case QUAD:
     case QUADS:
       if ((vertexCount % 4) == 0) {
-        quad(vertices[vertexCount - 4][X],
-             vertices[vertexCount - 4][Y],
-             vertices[vertexCount - 3][X],
-             vertices[vertexCount - 3][Y],
-             vertices[vertexCount - 2][X],
-             vertices[vertexCount - 2][Y],
-             x, y);
+        quad(vertices[vertexCount - 4][X], vertices[vertexCount - 4][Y],
+             vertices[vertexCount - 3][X], vertices[vertexCount - 3][Y],
+             vertices[vertexCount - 2][X], vertices[vertexCount - 2][Y], x, y);
       }
       break;
 
     case QUAD_STRIP:
       // 0---2---4
-      // |   |   |
+      // | | |
       // 1---3---5
       if ((vertexCount >= 4) && ((vertexCount % 2) == 0)) {
-        quad(vertices[vertexCount - 4][X],
-             vertices[vertexCount - 4][Y],
-             vertices[vertexCount - 2][X],
-             vertices[vertexCount - 2][Y],
-             x, y,
-             vertices[vertexCount - 3][X],
-             vertices[vertexCount - 3][Y]);
+        quad(vertices[vertexCount - 4][X], vertices[vertexCount - 4][Y],
+             vertices[vertexCount - 2][X], vertices[vertexCount - 2][Y], x, y,
+             vertices[vertexCount - 3][X], vertices[vertexCount - 3][Y]);
       }
       break;
 
     case POLYGON:
-      if (workPath.getNumCommands() == 0 || breakShape) {
-        workPath.moveTo(x, y);
+      if (workPath.getElements().size() == 0 || breakShape) {
+        workPath.getElements().add(new MoveTo(x, y));
         breakShape = false;
       } else {
-        workPath.lineTo(x, y);
+        workPath.getElements().add(new LineTo(x, y));
       }
       break;
     }
   }
-
 
   @Override
   public void vertex(float x, float y, float z) {
     showDepthWarningXYZ("vertex");
   }
 
-
   @Override
   public void vertex(float[] v) {
     vertex(v[X], v[Y]);
   }
-
 
   @Override
   public void vertex(float x, float y, float u, float v) {
     showVariationWarning("vertex(x, y, u, v)");
   }
 
-
   @Override
   public void vertex(float x, float y, float z, float u, float v) {
     showDepthWarningXYZ("vertex");
   }
-
 
   @Override
   public void beginContour() {
@@ -380,17 +338,16 @@ public class PGraphicsFX2D extends PGraphics {
     }
 
     // draw contours to auxiliary path so main path can be closed later
-    Path2D contourPath = auxPath;
+    Path contourPath = auxPath;
     auxPath = workPath;
     workPath = contourPath;
 
-    if (contourPath.getNumCommands() > 0) {  // first contour does not break
+    if (contourPath.getElements().size() > 0) { // first contour does not break
       breakShape = true;
     }
 
     openContour = true;
   }
-
 
   @Override
   public void endContour() {
@@ -399,15 +356,15 @@ public class PGraphicsFX2D extends PGraphics {
       return;
     }
 
-    if (workPath.getNumCommands() > 0) workPath.closePath();
+    if (workPath.getElements().size() > 0)
+      workPath.getElements().clear();
 
-    Path2D temp = workPath;
+    Path temp = workPath;
     workPath = auxPath;
     auxPath = temp;
 
     openContour = false;
   }
-
 
   @Override
   public void endShape(int mode) {
@@ -415,13 +372,13 @@ public class PGraphicsFX2D extends PGraphics {
       endContour();
       PGraphics.showWarning("Missing endContour() before endShape()");
     }
-    if (workPath.getNumCommands() > 0) {
+    if (workPath.getElements().size() > 0) {
       if (shape == POLYGON) {
         if (mode == CLOSE) {
-          workPath.closePath();
+          workPath.getElements().add(new ClosePath());
         }
-        if (auxPath.getNumCommands() > 0) {
-          workPath.append(auxPath, false);
+        if (auxPath.getElements().size() > 0) {
+          workPath.getElements().addAll(auxPath.getElements());
         }
         drawShape(workPath);
       }
@@ -434,158 +391,158 @@ public class PGraphicsFX2D extends PGraphics {
     loaded = false;
   }
 
-
-  private void drawShape(Shape s) {
+  private void drawShape(Path s) {
     context.beginPath();
-    PathIterator pi = s.getPathIterator(null);
-    while (!pi.isDone()) {
-      int pitype = pi.currentSegment(pathCoordsBuffer);
-      switch (pitype) {
-        case PathIterator.SEG_MOVETO:
-          context.moveTo(pathCoordsBuffer[0], pathCoordsBuffer[1]);
-          break;
-        case PathIterator.SEG_LINETO:
-          context.lineTo(pathCoordsBuffer[0], pathCoordsBuffer[1]);
-          break;
-        case PathIterator.SEG_QUADTO:
-          context.quadraticCurveTo(pathCoordsBuffer[0], pathCoordsBuffer[1],
-                                   pathCoordsBuffer[2], pathCoordsBuffer[3]);
-          break;
-        case PathIterator.SEG_CUBICTO:
-          context.bezierCurveTo(pathCoordsBuffer[0], pathCoordsBuffer[1],
-                                pathCoordsBuffer[2], pathCoordsBuffer[3],
-                                pathCoordsBuffer[4], pathCoordsBuffer[5]);
-          break;
-        case PathIterator.SEG_CLOSE:
-          context.closePath();
-          break;
-        default:
-          showWarning("Unknown segment type " + pitype);
+    for (PathElement pe : s.getElements()) {
+      if (pe instanceof MoveTo) {
+        context.moveTo(pathCoordsBuffer[0], pathCoordsBuffer[1]);
+      } else if (pe instanceof LineTo) {
+        context.lineTo(pathCoordsBuffer[0], pathCoordsBuffer[1]);
+      } else if (pe instanceof QuadCurveTo) {
+        context.quadraticCurveTo(pathCoordsBuffer[0], pathCoordsBuffer[1],
+                                 pathCoordsBuffer[2], pathCoordsBuffer[3]);
+      } else if (pe instanceof CubicCurveTo) {
+        context.bezierCurveTo(pathCoordsBuffer[0], pathCoordsBuffer[1],
+                              pathCoordsBuffer[2], pathCoordsBuffer[3],
+                              pathCoordsBuffer[4], pathCoordsBuffer[5]);
+      } else if (pe instanceof ClosePath) {
+        context.closePath();
+      } else {
+        showWarning("Unknown segment type " + pe.getClass().getName());
       }
-      pi.next();
+
     }
-    if (fill) context.fill();
-    if (stroke) context.stroke();
+    if (fill)
+      context.fill();
+    if (stroke)
+      context.stroke();
   }
-
-
 
   //////////////////////////////////////////////////////////////
 
   // CLIPPING
 
-
   @Override
   protected void clipImpl(float x1, float y1, float x2, float y2) {
-    //g2.setClip(new Rectangle2D.Float(x1, y1, x2 - x1, y2 - y1));
+    // g2.setClip(new Rectangle2D.Float(x1, y1, x2 - x1, y2 - y1));
     showTodoWarning("clip()", 3274);
   }
 
-
   @Override
   public void noClip() {
-    //g2.setClip(null);
+    // g2.setClip(null);
     showTodoWarning("noClip()", 3274);
   }
-
-
 
   //////////////////////////////////////////////////////////////
 
   // BLEND
 
-
   @Override
   protected void blendModeImpl() {
     BlendMode mode = BlendMode.SRC_OVER;
     switch (blendMode) {
-      case REPLACE: showWarning("blendMode(REPLACE) is not supported"); break;
-      case BLEND: break;  // this is SRC_OVER, the default
-      case ADD: mode = BlendMode.ADD; break; // everyone's favorite
-      case SUBTRACT: showWarning("blendMode(SUBTRACT) is not supported"); break;
-      case LIGHTEST: mode = BlendMode.LIGHTEN; break;
-      case DARKEST: mode = BlendMode.DARKEN; break;
-      case DIFFERENCE: mode = BlendMode.DIFFERENCE; break;
-      case EXCLUSION: mode = BlendMode.EXCLUSION; break;
-      case MULTIPLY: mode = BlendMode.MULTIPLY; break;
-      case SCREEN: mode = BlendMode.SCREEN; break;
-      case OVERLAY: mode = BlendMode.OVERLAY; break;
-      case HARD_LIGHT: mode = BlendMode.HARD_LIGHT; break;
-      case SOFT_LIGHT: mode = BlendMode.SOFT_LIGHT; break;
-      case DODGE: mode = BlendMode.COLOR_DODGE; break;
-      case BURN: mode = BlendMode.COLOR_BURN; break;
+    case REPLACE:
+      showWarning("blendMode(REPLACE) is not supported");
+      break;
+    case BLEND:
+      break; // this is SRC_OVER, the default
+    case ADD:
+      mode = BlendMode.ADD;
+      break; // everyone's favorite
+    case SUBTRACT:
+      showWarning("blendMode(SUBTRACT) is not supported");
+      break;
+    case LIGHTEST:
+      mode = BlendMode.LIGHTEN;
+      break;
+    case DARKEST:
+      mode = BlendMode.DARKEN;
+      break;
+    case DIFFERENCE:
+      mode = BlendMode.DIFFERENCE;
+      break;
+    case EXCLUSION:
+      mode = BlendMode.EXCLUSION;
+      break;
+    case MULTIPLY:
+      mode = BlendMode.MULTIPLY;
+      break;
+    case SCREEN:
+      mode = BlendMode.SCREEN;
+      break;
+    case OVERLAY:
+      mode = BlendMode.OVERLAY;
+      break;
+    case HARD_LIGHT:
+      mode = BlendMode.HARD_LIGHT;
+      break;
+    case SOFT_LIGHT:
+      mode = BlendMode.SOFT_LIGHT;
+      break;
+    case DODGE:
+      mode = BlendMode.COLOR_DODGE;
+      break;
+    case BURN:
+      mode = BlendMode.COLOR_BURN;
+      break;
     }
     context.setGlobalBlendMode(mode);
   }
-
-
 
   //////////////////////////////////////////////////////////////
 
   // BEZIER VERTICES
 
-
   @Override
   protected void bezierVertexCheck() {
     if (shape == 0 || shape != POLYGON) {
-      throw new RuntimeException("beginShape() or beginShape(POLYGON) " +
-                                 "must be used before bezierVertex() or quadraticVertex()");
+      throw new RuntimeException("beginShape() or beginShape(POLYGON) "
+          + "must be used before bezierVertex() or quadraticVertex()");
     }
-    if (workPath.getNumCommands() == 0) {
-      throw new RuntimeException("vertex() must be used at least once " +
-                                 "before bezierVertex() or quadraticVertex()");
+    if (workPath.getElements().size() == 0) {
+      throw new RuntimeException("vertex() must be used at least once "
+          + "before bezierVertex() or quadraticVertex()");
     }
   }
 
   @Override
-  public void bezierVertex(float x1, float y1,
-                           float x2, float y2,
-                           float x3, float y3) {
+  public void bezierVertex(float x1, float y1, float x2, float y2, float x3,
+                           float y3) {
     bezierVertexCheck();
-    workPath.curveTo(x1, y1, x2, y2, x3, y3);
+    workPath.getElements().add(new CubicCurveTo(x1, y1, x2, y2, x3, y3));
   }
 
-
   @Override
-  public void bezierVertex(float x2, float y2, float z2,
-                           float x3, float y3, float z3,
-                           float x4, float y4, float z4) {
+  public void bezierVertex(float x2, float y2, float z2, float x3, float y3,
+                           float z3, float x4, float y4, float z4) {
     showDepthWarningXYZ("bezierVertex");
   }
-
-
 
   //////////////////////////////////////////////////////////////
 
   // QUADRATIC BEZIER VERTICES
 
-
   @Override
-  public void quadraticVertex(float ctrlX, float ctrlY,
-                              float endX, float endY) {
+  public void quadraticVertex(float ctrlX, float ctrlY, float endX,
+                              float endY) {
     bezierVertexCheck();
-    workPath.quadTo(ctrlX, ctrlY, endX, endY);
+    workPath.getElements().add(new QuadCurveTo(ctrlX, ctrlY, endX, endY));
   }
 
-
   @Override
-  public void quadraticVertex(float x2, float y2, float z2,
-                         float x4, float y4, float z4) {
+  public void quadraticVertex(float x2, float y2, float z2, float x4, float y4,
+                              float z4) {
     showDepthWarningXYZ("quadVertex");
   }
-
-
 
   //////////////////////////////////////////////////////////////
 
   // CURVE VERTICES
 
-
   @Override
-  protected void curveVertexSegment(float x1, float y1,
-                                    float x2, float y2,
-                                    float x3, float y3,
-                                    float x4, float y4) {
+  protected void curveVertexSegment(float x1, float y1, float x2, float y2,
+                                    float x3, float y3, float x4, float y4) {
     if (curveCoordX == null) {
       curveCoordX = new float[4];
       curveCoordY = new float[4];
@@ -610,23 +567,20 @@ public class PGraphicsFX2D extends PGraphics {
 
     // since the paths are continuous,
     // only the first point needs the actual moveto
-    if (workPath.getNumCommands() == 0) {
-      workPath.moveTo(curveDrawX[0], curveDrawY[0]);
+    if (workPath.getElements().size() == 0) {
+      workPath.getElements().add(new MoveTo(curveDrawX[0], curveDrawY[0]));
       breakShape = false;
     }
 
-    workPath.curveTo(curveDrawX[1], curveDrawY[1],
-                     curveDrawX[2], curveDrawY[2],
-                     curveDrawX[3], curveDrawY[3]);
+    workPath.getElements()
+        .add(new CubicCurveTo(curveDrawX[1], curveDrawY[1], curveDrawX[2],
+                              curveDrawY[2], curveDrawX[3], curveDrawY[3]));
   }
-
 
   @Override
   public void curveVertex(float x, float y, float z) {
     showDepthWarningXYZ("curveVertex");
   }
-
-
 
   //////////////////////////////////////////////////////////////
 
@@ -636,7 +590,6 @@ public class PGraphicsFX2D extends PGraphics {
   public void flush() {
     flushPixels();
   }
-
 
   protected void flushPixels() {
     boolean hasPixels = modified && pixels != null;
@@ -657,9 +610,8 @@ public class PGraphicsFX2D extends PGraphics {
                      mx1 + my1 * pixelWidth, pixelWidth);
       } else {
         // The only way to push all the pixels is to draw a scaled-down image
-        if (snapshotImage == null ||
-            snapshotImage.getWidth() != pixelWidth ||
-            snapshotImage.getHeight() != pixelHeight) {
+        if (snapshotImage == null || snapshotImage.getWidth() != pixelWidth
+            || snapshotImage.getHeight() != pixelHeight) {
           snapshotImage = new WritableImage(pixelWidth, pixelHeight);
         }
 
@@ -677,17 +629,14 @@ public class PGraphicsFX2D extends PGraphics {
     modified = false;
   }
 
-
   protected void beforeContextDraw() {
     flushPixels();
     loaded = false;
   }
 
-
   //////////////////////////////////////////////////////////////
 
   // POINT, LINE, TRIANGLE, QUAD
-
 
   @Override
   public void point(float x, float y) {
@@ -699,7 +648,6 @@ public class PGraphicsFX2D extends PGraphics {
 //      }
     }
   }
-
 
   @Override
   public void line(float x1, float y1, float x2, float y2) {
@@ -713,10 +661,9 @@ public class PGraphicsFX2D extends PGraphics {
     context.strokeLine(x1, y1, x2, y2);
   }
 
-
   @Override
-  public void triangle(float x1, float y1, float x2, float y2,
-                       float x3, float y3) {
+  public void triangle(float x1, float y1, float x2, float y2, float x3,
+                       float y3) {
     beforeContextDraw();
     if (drawingThinLines()) {
       x1 += 0.5f;
@@ -731,14 +678,15 @@ public class PGraphicsFX2D extends PGraphics {
     context.lineTo(x2, y2);
     context.lineTo(x3, y3);
     context.closePath();
-    if (fill) context.fill();
-    if (stroke) context.stroke();
+    if (fill)
+      context.fill();
+    if (stroke)
+      context.stroke();
   }
 
-
   @Override
-  public void quad(float x1, float y1, float x2, float y2,
-                   float x3, float y3, float x4, float y4) {
+  public void quad(float x1, float y1, float x2, float y2, float x3, float y3,
+                   float x4, float y4) {
     beforeContextDraw();
     if (drawingThinLines()) {
       x1 += 0.5f;
@@ -756,22 +704,19 @@ public class PGraphicsFX2D extends PGraphics {
     context.lineTo(x3, y3);
     context.lineTo(x4, y4);
     context.closePath();
-    if (fill) context.fill();
-    if (stroke) context.stroke();
+    if (fill)
+      context.fill();
+    if (stroke)
+      context.stroke();
   }
-
-
 
   //////////////////////////////////////////////////////////////
 
   // RECT
 
+  // public void rectMode(int mode)
 
-  //public void rectMode(int mode)
-
-
-  //public void rect(float a, float b, float c, float d)
-
+  // public void rect(float a, float b, float c, float d)
 
   @Override
   protected void rectImpl(float x1, float y1, float x2, float y2) {
@@ -782,22 +727,19 @@ public class PGraphicsFX2D extends PGraphics {
       y1 += 0.5f;
       y2 += 0.5f;
     }
-    if (fill) context.fillRect(x1, y1, x2 - x1, y2 - y1);
-    if (stroke) context.strokeRect(x1, y1, x2 - x1, y2 - y1);
+    if (fill)
+      context.fillRect(x1, y1, x2 - x1, y2 - y1);
+    if (stroke)
+      context.strokeRect(x1, y1, x2 - x1, y2 - y1);
   }
-
-
 
   //////////////////////////////////////////////////////////////
 
   // ELLIPSE
 
+  // public void ellipseMode(int mode)
 
-  //public void ellipseMode(int mode)
-
-
-  //public void ellipse(float a, float b, float c, float d)
-
+  // public void ellipse(float a, float b, float c, float d)
 
   @Override
   protected void ellipseImpl(float x, float y, float w, float h) {
@@ -806,24 +748,22 @@ public class PGraphicsFX2D extends PGraphics {
       x += 0.5f;
       y += 0.5f;
     }
-    if (fill) context.fillOval(x, y, w, h);
-    if (stroke) context.strokeOval(x, y, w, h);
+    if (fill)
+      context.fillOval(x, y, w, h);
+    if (stroke)
+      context.strokeOval(x, y, w, h);
   }
-
-
 
   //////////////////////////////////////////////////////////////
 
   // ARC
 
-
-  //public void arc(float a, float b, float c, float d,
-  //                float start, float stop)
-
+  // public void arc(float a, float b, float c, float d,
+  // float start, float stop)
 
   @Override
-  protected void arcImpl(float x, float y, float w, float h,
-                         float start, float stop, int mode) {
+  protected void arcImpl(float x, float y, float w, float h, float start,
+                         float stop, int mode) {
     beforeContextDraw();
 
     if (drawingThinLines()) {
@@ -840,14 +780,14 @@ public class PGraphicsFX2D extends PGraphics {
 
     // The defaults, before 2.0b7, were to stroke as Arc2D.OPEN, and then fill
     // using Arc2D.PIE. That's a little wonky, but it's here for compatability.
-    ArcType fillMode = ArcType.ROUND;  // Arc2D.PIE
+    ArcType fillMode = ArcType.ROUND; // Arc2D.PIE
     ArcType strokeMode = ArcType.OPEN;
 
     if (mode == OPEN) {
       fillMode = ArcType.OPEN;
 
     } else if (mode == PIE) {
-      strokeMode = ArcType.ROUND;  // PIE
+      strokeMode = ArcType.ROUND; // PIE
 
     } else if (mode == CHORD) {
       fillMode = ArcType.CHORD;
@@ -855,125 +795,98 @@ public class PGraphicsFX2D extends PGraphics {
     }
 
     if (fill) {
-      context.fillArc(x, y, w, h, PApplet.degrees(start), PApplet.degrees(sweep), fillMode);
+      context.fillArc(x, y, w, h, PApplet.degrees(start),
+                      PApplet.degrees(sweep), fillMode);
     }
     if (stroke) {
-      context.strokeArc(x, y, w, h, PApplet.degrees(start), PApplet.degrees(sweep), strokeMode);
+      context.strokeArc(x, y, w, h, PApplet.degrees(start),
+                        PApplet.degrees(sweep), strokeMode);
     }
   }
-
-
 
   //////////////////////////////////////////////////////////////
 
   // BOX
 
-
-  //public void box(float size)
-
+  // public void box(float size)
 
   @Override
   public void box(float w, float h, float d) {
     showMethodWarning("box");
   }
 
-
-
   //////////////////////////////////////////////////////////////
 
   // SPHERE
 
+  // public void sphereDetail(int res)
 
-  //public void sphereDetail(int res)
-
-
-  //public void sphereDetail(int ures, int vres)
-
+  // public void sphereDetail(int ures, int vres)
 
   @Override
   public void sphere(float r) {
     showMethodWarning("sphere");
   }
 
-
-
   //////////////////////////////////////////////////////////////
 
   // BEZIER
 
+  // public float bezierPoint(float a, float b, float c, float d, float t)
 
-  //public float bezierPoint(float a, float b, float c, float d, float t)
+  // public float bezierTangent(float a, float b, float c, float d, float t)
 
+  // protected void bezierInitCheck()
 
-  //public float bezierTangent(float a, float b, float c, float d, float t)
-
-
-  //protected void bezierInitCheck()
-
-
-  //protected void bezierInit()
-
+  // protected void bezierInit()
 
   /** Ignored (not needed) by this renderer. */
   @Override
-  public void bezierDetail(int detail) { }
+  public void bezierDetail(int detail) {
+  }
 
+  // public void bezier(float x1, float y1,
+  // float x2, float y2,
+  // float x3, float y3,
+  // float x4, float y4)
 
-  //public void bezier(float x1, float y1,
-  //                   float x2, float y2,
-  //                   float x3, float y3,
-  //                   float x4, float y4)
-
-
-  //public void bezier(float x1, float y1, float z1,
-  //                   float x2, float y2, float z2,
-  //                   float x3, float y3, float z3,
-  //                   float x4, float y4, float z4)
-
-
+  // public void bezier(float x1, float y1, float z1,
+  // float x2, float y2, float z2,
+  // float x3, float y3, float z3,
+  // float x4, float y4, float z4)
 
   //////////////////////////////////////////////////////////////
 
   // CURVE
 
+  // public float curvePoint(float a, float b, float c, float d, float t)
 
-  //public float curvePoint(float a, float b, float c, float d, float t)
-
-
-  //public float curveTangent(float a, float b, float c, float d, float t)
-
+  // public float curveTangent(float a, float b, float c, float d, float t)
 
   /** Ignored (not needed) by this renderer. */
   @Override
-  public void curveDetail(int detail) { }
+  public void curveDetail(int detail) {
+  }
 
+  // public void curveTightness(float tightness)
 
-  //public void curveTightness(float tightness)
+  // protected void curveInitCheck()
 
+  // protected void curveInit()
 
-  //protected void curveInitCheck()
+  // public void curve(float x1, float y1,
+  // float x2, float y2,
+  // float x3, float y3,
+  // float x4, float y4)
 
-
-  //protected void curveInit()
-
-
-  //public void curve(float x1, float y1,
-  //                  float x2, float y2,
-  //                  float x3, float y3,
-  //                  float x4, float y4)
-
-
-  //public void curve(float x1, float y1, float z1,
-  //                  float x2, float y2, float z2,
-  //                  float x3, float y3, float z3,
-  //                  float x4, float y4, float z4)
-
-
+  // public void curve(float x1, float y1, float z1,
+  // float x2, float y2, float z2,
+  // float x3, float y3, float z3,
+  // float x4, float y4, float z4)
 
   //////////////////////////////////////////////////////////////
 
   // SMOOTH
-
 
 //  @Override
 //  public void smooth() {
@@ -983,7 +896,6 @@ public class PGraphicsFX2D extends PGraphics {
 //      quality = 4;  // change back to bicubic
 //    }
 //  }
-
 
 //  @Override
 //  public void smooth(int quality) {
@@ -1002,60 +914,52 @@ public class PGraphicsFX2D extends PGraphics {
 //    showMissingWarning("noSmooth");
 //  }
 
-
-
   //////////////////////////////////////////////////////////////
 
   // IMAGE
 
+  // public void imageMode(int mode)
 
-  //public void imageMode(int mode)
+  // public void image(PImage image, float x, float y)
 
+  // public void image(PImage image, float x, float y, float c, float d)
 
-  //public void image(PImage image, float x, float y)
-
-
-  //public void image(PImage image, float x, float y, float c, float d)
-
-
-  //public void image(PImage image,
-  //                  float a, float b, float c, float d,
-  //                  int u1, int v1, int u2, int v2)
-
+  // public void image(PImage image,
+  // float a, float b, float c, float d,
+  // int u1, int v1, int u2, int v2)
 
   /**
    * Handle renderer-specific image drawing.
    */
   @Override
-  protected void imageImpl(PImage who,
-                           float x1, float y1, float x2, float y2,
+  protected void imageImpl(PImage who, float x1, float y1, float x2, float y2,
                            int u1, int v1, int u2, int v2) {
     // Image not ready yet, or an error
-    if (who.width <= 0 || who.height <= 0) return;
+    if (who.width <= 0 || who.height <= 0)
+      return;
 
     ImageCache cash = (ImageCache) getCache(who);
 
     // Nuke the cache if the image was resized
     if (cash != null) {
-      if (who.pixelWidth != cash.image.getWidth() ||
-          who.pixelHeight != cash.image.getHeight()) {
+      if (who.pixelWidth != cash.image.getWidth()
+          || who.pixelHeight != cash.image.getHeight()) {
         cash = null;
       }
     }
 
     if (cash == null) {
-      //System.out.println("making new image cache");
-      cash = new ImageCache(); //who);
+      // System.out.println("making new image cache");
+      cash = new ImageCache(); // who);
       setCache(who, cash);
-      who.updatePixels();  // mark the whole thing for update
+      who.updatePixels(); // mark the whole thing for update
       who.setModified();
     }
 
     // If image previously was tinted, or the color changed
     // or the image was tinted, and tint is now disabled
-    if ((tint && !cash.tinted) ||
-        (tint && (cash.tintedColor != tintColor)) ||
-        (!tint && cash.tinted)) {
+    if ((tint && !cash.tinted) || (tint && (cash.tintedColor != tintColor))
+        || (!tint && cash.tinted)) {
       // For tint change, mark all pixels as needing update.
       who.updatePixels();
     }
@@ -1076,31 +980,32 @@ public class PGraphicsFX2D extends PGraphics {
     u2 *= who.pixelDensity;
     v2 *= who.pixelDensity;
 
-    context.drawImage(((ImageCache) getCache(who)).image,
-                      u1, v1, u2-u1, v2-v1,
-                      x1, y1, x2-x1, y2-y1);
+    context.drawImage(((ImageCache) getCache(who)).image, u1, v1, u2 - u1,
+                      v2 - v1, x1, y1, x2 - x1, y2 - y1);
   }
-
 
   static class ImageCache {
     boolean tinted;
+
     int tintedColor;
-    int[] tintedTemp;  // one row of tinted pixels
-    //BufferedImage image;
+
+    int[] tintedTemp; // one row of tinted pixels
+    // BufferedImage image;
+
     WritableImage image;
 
     /**
      * Update the pixels of the cache image. Already determined that the tint
-     * has changed, or the pixels have changed, so should just go through
-     * with the update without further checks.
+     * has changed, or the pixels have changed, so should just go through with
+     * the update without further checks.
      */
     public void update(PImage source, boolean tint, int tintColor) {
-      //int bufferType = BufferedImage.TYPE_INT_ARGB;
+      // int bufferType = BufferedImage.TYPE_INT_ARGB;
       int targetType = ARGB;
       boolean opaque = (tintColor & 0xFF000000) == 0xFF000000;
       if (source.format == RGB) {
         if (!tint || (tint && opaque)) {
-          //bufferType = BufferedImage.TYPE_INT_RGB;
+          // bufferType = BufferedImage.TYPE_INT_RGB;
           targetType = RGB;
         }
       }
@@ -1119,7 +1024,7 @@ public class PGraphicsFX2D extends PGraphics {
         image = new WritableImage(source.pixelWidth, source.pixelHeight);
       }
 
-      //WritableRaster wr = image.getRaster();
+      // WritableRaster wr = image.getRaster();
       PixelWriter pw = image.getPixelWriter();
       if (tint) {
         if (tintedTemp == null || tintedTemp.length != source.pixelWidth) {
@@ -1132,7 +1037,7 @@ public class PGraphicsFX2D extends PGraphics {
         int g2 = (tintColor >> 8) & 0xff;
         int b2 = (tintColor) & 0xff;
 
-        //if (bufferType == BufferedImage.TYPE_INT_RGB) {
+        // if (bufferType == BufferedImage.TYPE_INT_RGB) {
         if (targetType == RGB) {
           // The target image is opaque, meaning that the source image has no
           // alpha (is not ARGB), and the tint has no alpha.
@@ -1147,13 +1052,12 @@ public class PGraphicsFX2D extends PGraphics {
               // Prior to 2.1, the alpha channel was commented out here,
               // but can't remember why (just thought unnecessary b/c of RGB?)
               // https://github.com/processing/processing/issues/2030
-              tintedTemp[x] = 0xFF000000 |
-                  (((r2 * r1) & 0xff00) << 8) |
-                  ((g2 * g1) & 0xff00) |
-                  (((b2 * b1) & 0xff00) >> 8);
+              tintedTemp[x] = 0xFF000000 | (((r2 * r1) & 0xff00) << 8)
+                  | ((g2 * g1) & 0xff00) | (((b2 * b1) & 0xff00) >> 8);
             }
-            //wr.setDataElements(0, y, source.width, 1, tintedTemp);
-            pw.setPixels(0, y, source.pixelWidth, 1, argbFormat, tintedTemp, 0, source.pixelWidth);
+            // wr.setDataElements(0, y, source.width, 1, tintedTemp);
+            pw.setPixels(0, y, source.pixelWidth, 1, argbFormat, tintedTemp, 0,
+                         source.pixelWidth);
           }
           // could this be any slower?
 //          float[] scales = { tintR, tintG, tintB };
@@ -1161,18 +1065,18 @@ public class PGraphicsFX2D extends PGraphics {
 //          RescaleOp op = new RescaleOp(scales, offsets, null);
 //          op.filter(image, image);
 
-        //} else if (bufferType == BufferedImage.TYPE_INT_ARGB) {
+          // } else if (bufferType == BufferedImage.TYPE_INT_ARGB) {
         } else if (targetType == ARGB) {
-          if (source.format == RGB &&
-              (tintColor & 0xffffff) == 0xffffff) {
+          if (source.format == RGB && (tintColor & 0xffffff) == 0xffffff) {
             int hi = tintColor & 0xff000000;
             int index = 0;
             for (int y = 0; y < source.pixelHeight; y++) {
               for (int x = 0; x < source.pixelWidth; x++) {
                 tintedTemp[x] = hi | (source.pixels[index++] & 0xFFFFFF);
               }
-              //wr.setDataElements(0, y, source.width, 1, tintedTemp);
-              pw.setPixels(0, y, source.pixelWidth, 1, argbFormat, tintedTemp, 0, source.pixelWidth);
+              // wr.setDataElements(0, y, source.width, 1, tintedTemp);
+              pw.setPixels(0, y, source.pixelWidth, 1, argbFormat, tintedTemp,
+                           0, source.pixelWidth);
             }
           } else {
             int index = 0;
@@ -1184,10 +1088,8 @@ public class PGraphicsFX2D extends PGraphics {
                   int r1 = (argb1 >> 16) & 0xff;
                   int g1 = (argb1 >> 8) & 0xff;
                   int b1 = (argb1) & 0xff;
-                  tintedTemp[x] = alpha |
-                      (((r2 * r1) & 0xff00) << 8) |
-                      ((g2 * g1) & 0xff00) |
-                      (((b2 * b1) & 0xff00) >> 8);
+                  tintedTemp[x] = alpha | (((r2 * r1) & 0xff00) << 8)
+                      | ((g2 * g1) & 0xff00) | (((b2 * b1) & 0xff00) >> 8);
                 }
               } else if (source.format == ARGB) {
                 for (int x = 0; x < source.pixelWidth; x++) {
@@ -1196,22 +1098,20 @@ public class PGraphicsFX2D extends PGraphics {
                   int r1 = (argb1 >> 16) & 0xff;
                   int g1 = (argb1 >> 8) & 0xff;
                   int b1 = (argb1) & 0xff;
-                  tintedTemp[x] =
-                      (((a2 * a1) & 0xff00) << 16) |
-                      (((r2 * r1) & 0xff00) << 8) |
-                      ((g2 * g1) & 0xff00) |
-                      (((b2 * b1) & 0xff00) >> 8);
+                  tintedTemp[x] = (((a2 * a1) & 0xff00) << 16)
+                      | (((r2 * r1) & 0xff00) << 8) | ((g2 * g1) & 0xff00)
+                      | (((b2 * b1) & 0xff00) >> 8);
                 }
               } else if (source.format == ALPHA) {
                 int lower = tintColor & 0xFFFFFF;
                 for (int x = 0; x < source.pixelWidth; x++) {
                   int a1 = source.pixels[index++];
-                  tintedTemp[x] =
-                      (((a2 * a1) & 0xff00) << 16) | lower;
+                  tintedTemp[x] = (((a2 * a1) & 0xff00) << 16) | lower;
                 }
               }
-              //wr.setDataElements(0, y, source.width, 1, tintedTemp);
-              pw.setPixels(0, y, source.pixelWidth, 1, argbFormat, tintedTemp, 0, source.pixelWidth);
+              // wr.setDataElements(0, y, source.width, 1, tintedTemp);
+              pw.setPixels(0, y, source.pixelWidth, 1, argbFormat, tintedTemp,
+                           0, source.pixelWidth);
             }
           }
           // Not sure why ARGB images take the scales in this order...
@@ -1220,7 +1120,7 @@ public class PGraphicsFX2D extends PGraphics {
 //          RescaleOp op = new RescaleOp(scales, offsets, null);
 //          op.filter(image, image);
         }
-      } else {  // !tint
+      } else { // !tint
         if (targetType == RGB && (source.pixels[0] >> 24 == 0)) {
           // If it's an RGB image and the high bits aren't set, need to set
           // the high bits to opaque because we're drawing ARGB images.
@@ -1231,10 +1131,10 @@ public class PGraphicsFX2D extends PGraphics {
           // in a PImage and how the high bits will be set.
         }
         // If no tint, just shove the pixels on in there verbatim
-        //wr.setDataElements(0, 0, source.width, source.height, source.pixels);
-        //System.out.println("moving the big one");
-        pw.setPixels(0, 0, source.pixelWidth, source.pixelHeight,
-                     argbFormat, source.pixels, 0, source.pixelWidth);
+        // wr.setDataElements(0, 0, source.width, source.height, source.pixels);
+        // System.out.println("moving the big one");
+        pw.setPixels(0, 0, source.pixelWidth, source.pixelHeight, argbFormat,
+                     source.pixels, 0, source.pixelWidth);
       }
       this.tinted = tint;
       this.tintedColor = tintColor;
@@ -1250,35 +1150,26 @@ public class PGraphicsFX2D extends PGraphics {
     }
   }
 
-
-
   //////////////////////////////////////////////////////////////
 
   // SHAPE
 
+  // public void shapeMode(int mode)
 
-  //public void shapeMode(int mode)
+  // public void shape(PShape shape)
 
+  // public void shape(PShape shape, float x, float y)
 
-  //public void shape(PShape shape)
-
-
-  //public void shape(PShape shape, float x, float y)
-
-
-  //public void shape(PShape shape, float x, float y, float c, float d)
-
+  // public void shape(PShape shape, float x, float y, float c, float d)
 
   //////////////////////////////////////////////////////////////
 
   // SHAPE I/O
 
-
   @Override
   public PShape loadShape(String filename) {
     return loadShape(filename, null);
   }
-
 
   @Override
   public PShape loadShape(String filename, String options) {
@@ -1290,12 +1181,9 @@ public class PGraphicsFX2D extends PGraphics {
     return null;
   }
 
-
-
   //////////////////////////////////////////////////////////////
 
   // TEXT ATTRIBTUES
-
 
   protected FontCache fontCache = new FontCache();
 
@@ -1303,10 +1191,9 @@ public class PGraphicsFX2D extends PGraphics {
   // and mirrors PGraphics.textFont field
   protected FontInfo textFontInfo;
 
-
   @Override
-  protected PFont createFont(String name, float size,
-                             boolean smooth, char[] charset) {
+  protected PFont createFont(String name, float size, boolean smooth,
+                             char[] charset) {
     PFont font = super.createFont(name, size, smooth, charset);
     if (font.isStream()) {
       fontCache.nameToFilename.put(font.getName(), name);
@@ -1314,19 +1201,16 @@ public class PGraphicsFX2D extends PGraphics {
     return font;
   }
 
-
   @Override
   protected void defaultFontOrDeath(String method, float size) {
     super.defaultFontOrDeath(method, size);
     handleTextFont(textFont, size);
   }
 
-
   @Override
   protected boolean textModeCheck(int mode) {
     return mode == MODEL;
   }
-
 
   @Override
   public float textAscent() {
@@ -1339,7 +1223,6 @@ public class PGraphicsFX2D extends PGraphics {
     return textFontInfo.ascent;
   }
 
-
   @Override
   public float textDescent() {
     if (textFont == null) {
@@ -1351,7 +1234,6 @@ public class PGraphicsFX2D extends PGraphics {
     return textFontInfo.descent;
   }
 
-
   static final class FontInfo {
     // TODO: this should be based on memory consumption
     // this should be enough e.g. for all grays and alpha combos
@@ -1359,14 +1241,15 @@ public class PGraphicsFX2D extends PGraphics {
 
     // used only when there is native font
     Font font;
+
     float ascent;
+
     float descent;
 
     // used only when there is no native font
     // maps 32-bit color to the arrays of tinted glyph images
     Map<Integer, PImage[]> tintCache;
   }
-
 
   static final class FontCache {
     static final int MAX_CACHE_SIZE = 512;
@@ -1381,8 +1264,8 @@ public class PGraphicsFX2D extends PGraphics {
     // keeps all created fonts for reuse up to MAX_CACHE_SIZE limit
     // when the limit is reached, the least recently used font is removed
     // TODO: this should be based on memory consumtion
-    final LinkedHashMap<Key, FontInfo> cache =
-        new LinkedHashMap<>(16, 0.75f, true) {
+    final LinkedHashMap<Key, FontInfo> cache = new LinkedHashMap<>(16, 0.75f,
+                                                                   true) {
       @Override
       protected boolean removeEldestEntry(Map.Entry<Key, FontInfo> eldest) {
         return size() > MAX_CACHE_SIZE;
@@ -1438,14 +1321,18 @@ public class PGraphicsFX2D extends PGraphics {
 
     static final class Key {
       String name;
+
       float size;
 
       @Override
       public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+          return true;
+        if (o == null || getClass() != o.getClass())
+          return false;
         Key that = (Key) o;
-        if (Float.compare(that.size, size) != 0) return false;
+        if (Float.compare(that.size, size) != 0)
+          return false;
         return name.equals(that.name);
       }
 
@@ -1458,19 +1345,15 @@ public class PGraphicsFX2D extends PGraphics {
     }
   }
 
-
   ///////////////////////////////////////////////////////////////
 
   // TEXT
 
   // None of the variations of text() are overridden from PGraphics.
 
-
-
   //////////////////////////////////////////////////////////////
 
   // TEXT IMPL
-
 
   @Override
   protected void textFontImpl(PFont which, float size) {
@@ -1478,19 +1361,20 @@ public class PGraphicsFX2D extends PGraphics {
     handleTextSize(size);
   }
 
-
   @Override
   protected void textSizeImpl(float size) {
     handleTextFont(textFont, size);
     handleTextSize(size);
   }
 
-
   /**
-   * FX specific. When setting font or size, new font has to
-   * be created. Both textFontImpl and textSizeImpl call this one.
-   * @param which font to be set, not null
-   * @param size size to be set, greater than zero
+   * FX specific. When setting font or size, new font has to be created. Both
+   * textFontImpl and textSizeImpl call this one.
+   *
+   * @param which
+   *          font to be set, not null
+   * @param size
+   *          size to be set, greater than zero
    */
   protected void handleTextFont(PFont which, float size) {
     textFont = which;
@@ -1533,16 +1417,15 @@ public class PGraphicsFX2D extends PGraphics {
     context.setFont(textFontInfo.font);
   }
 
-
   @Override
-  protected void textLineImpl(char[] buffer, int start, int stop, float x, float y) {
+  protected void textLineImpl(char[] buffer, int start, int stop, float x,
+                              float y) {
     if (textFontInfo.font == null) {
       super.textLineImpl(buffer, start, stop, x, y);
     } else {
       context.fillText(new String(buffer, start, stop - start), x, y);
     }
   }
-
 
   protected PImage getTintedGlyphImage(PFont.Glyph glyph, int tintColor) {
     if (textFontInfo.tintCache == null) {
@@ -1571,35 +1454,32 @@ public class PGraphicsFX2D extends PGraphics {
     return tintedGlyph;
   }
 
-
   @Override
-  protected void textCharImpl(char ch, float x, float y) { //, float z) {
+  protected void textCharImpl(char ch, float x, float y) { // , float z) {
     PFont.Glyph glyph = textFont.getGlyph(ch);
     if (glyph != null) {
       if (textMode == MODEL) {
-        float high    = glyph.height     / (float) textFont.getSize();
-        float bwidth  = glyph.width      / (float) textFont.getSize();
+        float high = glyph.height / (float) textFont.getSize();
+        float bwidth = glyph.width / (float) textFont.getSize();
         float lextent = glyph.leftExtent / (float) textFont.getSize();
-        float textent = glyph.topExtent  / (float) textFont.getSize();
+        float textent = glyph.topExtent / (float) textFont.getSize();
 
         float x1 = x + lextent * textSize;
         float y1 = y - textent * textSize;
         float x2 = x1 + bwidth * textSize;
         float y2 = y1 + high * textSize;
 
-        PImage glyphImage = (fillColor == 0xFFFFFFFF) ?
-          glyph.image : getTintedGlyphImage(glyph, fillColor);
+        PImage glyphImage = (fillColor == 0xFFFFFFFF) ? glyph.image
+            : getTintedGlyphImage(glyph, fillColor);
 
-        textCharModelImpl(glyphImage,
-                          x1, y1, x2, y2,
-                          glyph.width, glyph.height);
+        textCharModelImpl(glyphImage, x1, y1, x2, y2, glyph.width,
+                          glyph.height);
       }
     } else if (ch != ' ' && ch != 127) {
-      showWarning("No glyph found for the " + ch +
-                  " (\\u" + PApplet.hex(ch, 4) + ") character");
+      showWarning("No glyph found for the " + ch + " (\\u" + PApplet.hex(ch, 4)
+          + ") character");
     }
   }
-
 
   @Override
   protected float textWidthImpl(char[] buffer, int start, int stop) {
@@ -1616,97 +1496,81 @@ public class PGraphicsFX2D extends PGraphics {
     return (float) fontCache.measuringText.getLayoutBounds().getWidth();
   }
 
-
-
   //////////////////////////////////////////////////////////////
 
   // MATRIX STACK
 
-
   @Override
   public void pushMatrix() {
     if (transformCount == transformStack.length) {
-      throw new RuntimeException("pushMatrix() cannot use push more than " +
-                                 transformStack.length + " times");
+      throw new RuntimeException("pushMatrix() cannot use push more than "
+          + transformStack.length + " times");
     }
-    transformStack[transformCount] = context.getTransform(transformStack[transformCount]);
+    transformStack[transformCount] = context
+        .getTransform(transformStack[transformCount]);
     transformCount++;
   }
-
 
   @Override
   public void popMatrix() {
     if (transformCount == 0) {
-      throw new RuntimeException("missing a pushMatrix() " +
-                                 "to go with that popMatrix()");
+      throw new RuntimeException("missing a pushMatrix() "
+          + "to go with that popMatrix()");
     }
     transformCount--;
     context.setTransform(transformStack[transformCount]);
   }
 
-
-
   //////////////////////////////////////////////////////////////
 
   // MATRIX TRANSFORMS
-
 
   @Override
   public void translate(float tx, float ty) {
     context.translate(tx, ty);
   }
 
-
-  //public void translate(float tx, float ty, float tz)
-
+  // public void translate(float tx, float ty, float tz)
 
   @Override
   public void rotate(float angle) {
     context.rotate(PApplet.degrees(angle));
   }
 
-
   @Override
   public void rotateX(float angle) {
     showDepthWarning("rotateX");
   }
-
 
   @Override
   public void rotateY(float angle) {
     showDepthWarning("rotateY");
   }
 
-
   @Override
   public void rotateZ(float angle) {
     showDepthWarning("rotateZ");
   }
-
 
   @Override
   public void rotate(float angle, float vx, float vy, float vz) {
     showVariationWarning("rotate");
   }
 
-
   @Override
   public void scale(float s) {
     context.scale(s, s);
   }
-
 
   @Override
   public void scale(float sx, float sy) {
     context.scale(sx, sy);
   }
 
-
   @Override
   public void scale(float sx, float sy, float sz) {
     showDepthWarningXYZ("scale");
   }
-
 
   @Override
   public void shearX(float angle) {
@@ -1715,7 +1579,6 @@ public class PGraphicsFX2D extends PGraphics {
     context.transform(temp);
   }
 
-
   @Override
   public void shearY(float angle) {
     Affine temp = new Affine();
@@ -1723,61 +1586,50 @@ public class PGraphicsFX2D extends PGraphics {
     context.transform(temp);
   }
 
-
-
   //////////////////////////////////////////////////////////////
 
   // MATRIX MORE
-
 
   @Override
   public void resetMatrix() {
     context.setTransform(new Affine());
   }
 
-
-  //public void applyMatrix(PMatrix2D source)
-
+  // public void applyMatrix(PMatrix2D source)
 
   @Override
-  public void applyMatrix(float n00, float n01, float n02,
-                          float n10, float n11, float n12) {
+  public void applyMatrix(float n00, float n01, float n02, float n10, float n11,
+                          float n12) {
     context.transform(n00, n10, n01, n11, n02, n12);
   }
 
-
-  //public void applyMatrix(PMatrix3D source)
-
+  // public void applyMatrix(PMatrix3D source)
 
   @Override
-  public void applyMatrix(float n00, float n01, float n02, float n03,
-                          float n10, float n11, float n12, float n13,
-                          float n20, float n21, float n22, float n23,
-                          float n30, float n31, float n32, float n33) {
+  public void applyMatrix(float n00, float n01, float n02, float n03, float n10,
+                          float n11, float n12, float n13, float n20, float n21,
+                          float n22, float n23, float n30, float n31, float n32,
+                          float n33) {
     showVariationWarning("applyMatrix");
   }
-
-
 
   //////////////////////////////////////////////////////////////
 
   // MATRIX GET/SET
-
 
   @Override
   public PMatrix getMatrix() {
     return getMatrix((PMatrix2D) null);
   }
 
-
   @Override
   public PMatrix2D getMatrix(PMatrix2D target) {
     if (target == null) {
       target = new PMatrix2D();
     }
-    //double[] transform = new double[6];
+    // double[] transform = new double[6];
     // TODO This is not tested; apparently Affine is a full 3x4
-    Affine t = context.getTransform(); //.getMatrix(transform);
+    Affine t = context.getTransform(); // .getMatrix(transform);
 //    target.set((float) transform[0], (float) transform[2], (float) transform[4],
 //               (float) transform[1], (float) transform[3], (float) transform[5]);
     target.set((float) t.getMxx(), (float) t.getMxy(), (float) t.getTx(),
@@ -1785,37 +1637,29 @@ public class PGraphicsFX2D extends PGraphics {
     return target;
   }
 
-
   @Override
   public PMatrix3D getMatrix(PMatrix3D target) {
     showVariationWarning("getMatrix");
     return target;
   }
 
-
-  //public void setMatrix(PMatrix source)
-
+  // public void setMatrix(PMatrix source)
 
   @Override
   public void setMatrix(PMatrix2D source) {
-    context.setTransform(source.m00, source.m10,
-                         source.m01, source.m11,
+    context.setTransform(source.m00, source.m10, source.m01, source.m11,
                          source.m02, source.m12);
   }
-
 
   @Override
   public void setMatrix(PMatrix3D source) {
     showVariationWarning("setMatrix");
   }
 
-
   @Override
   public void printMatrix() {
     getMatrix((PMatrix2D) null).print();
   }
-
-
 
 //  //////////////////////////////////////////////////////////////
 //
@@ -1843,24 +1687,19 @@ public class PGraphicsFX2D extends PGraphics {
 //  //                    float near, float far)
 //  //public void printProjection()
 
-
-
   //////////////////////////////////////////////////////////////
 
   // SCREEN and MODEL transforms
-
 
   @Override
   public float screenX(float x, float y) {
     return (float) context.getTransform().transform(x, y).getX();
   }
 
-
   @Override
   public float screenY(float x, float y) {
     return (float) context.getTransform().transform(x, y).getY();
   }
-
 
   @Override
   public float screenX(float x, float y, float z) {
@@ -1868,13 +1707,11 @@ public class PGraphicsFX2D extends PGraphics {
     return 0;
   }
 
-
   @Override
   public float screenY(float x, float y, float z) {
     showDepthWarningXYZ("screenY");
     return 0;
   }
-
 
   @Override
   public float screenZ(float x, float y, float z) {
@@ -1882,16 +1719,11 @@ public class PGraphicsFX2D extends PGraphics {
     return 0;
   }
 
+  // public float modelX(float x, float y, float z)
 
-  //public float modelX(float x, float y, float z)
+  // public float modelY(float x, float y, float z)
 
-
-  //public float modelY(float x, float y, float z)
-
-
-  //public float modelZ(float x, float y, float z)
-
-
+  // public float modelZ(float x, float y, float z)
 
 //  //////////////////////////////////////////////////////////////
 //
@@ -1899,12 +1731,9 @@ public class PGraphicsFX2D extends PGraphics {
 //
 //  // pushStyle(), popStyle(), style() and getStyle() inherited.
 
-
-
   //////////////////////////////////////////////////////////////
 
   // STROKE CAP/JOIN/WEIGHT
-
 
   @Override
   public void strokeCap(int cap) {
@@ -1918,7 +1747,6 @@ public class PGraphicsFX2D extends PGraphics {
     }
   }
 
-
   @Override
   public void strokeJoin(int join) {
     super.strokeJoin(join);
@@ -1931,14 +1759,11 @@ public class PGraphicsFX2D extends PGraphics {
     }
   }
 
-
   @Override
   public void strokeWeight(float weight) {
     super.strokeWeight(weight);
     context.setLineWidth(weight);
   }
-
-
 
   //////////////////////////////////////////////////////////////
 
@@ -1946,20 +1771,16 @@ public class PGraphicsFX2D extends PGraphics {
 
   // noStroke() and stroke() inherited from PGraphics.
 
-
   @Override
   protected void strokeFromCalc() {
     super.strokeFromCalc();
     context.setStroke(new Color(strokeR, strokeG, strokeB, strokeA));
   }
 
-
   protected boolean drawingThinLines() {
     // align strokes to pixel centers when drawing thin lines
     return stroke && strokeWeight == 1;
   }
-
-
 
   //////////////////////////////////////////////////////////////
 
@@ -1967,22 +1788,17 @@ public class PGraphicsFX2D extends PGraphics {
 
   // noTint() and tint() inherited from PGraphics.
 
-
-
   //////////////////////////////////////////////////////////////
 
   // FILL
 
   // noFill() and fill() inherited from PGraphics.
 
-
   @Override
   protected void fillFromCalc() {
     super.fillFromCalc();
     context.setFill(new Color(fillR, fillG, fillB, fillA));
   }
-
-
 
 //  //////////////////////////////////////////////////////////////
 //
@@ -2028,12 +1844,9 @@ public class PGraphicsFX2D extends PGraphics {
 //  //protected void lightPosition(int num, float x, float y, float z)
 //  //protected void lightDirection(int num, float x, float y, float z)
 
-
-
   //////////////////////////////////////////////////////////////
 
   // BACKGROUND
-
 
   @Override
   public void backgroundImpl() {
@@ -2051,15 +1864,14 @@ public class PGraphicsFX2D extends PGraphics {
 
     // This only takes into account cases where this is the primary surface.
     // Not sure what we do with offscreen anyway.
-    context.setFill(new Color(backgroundR, backgroundG, backgroundB, backgroundA));
+    context
+        .setFill(new Color(backgroundR, backgroundG, backgroundB, backgroundA));
     context.setGlobalBlendMode(BlendMode.SRC_OVER);
     context.fillRect(0, 0, width, height);
 
     // Restore drawing context (transform, fill, blend mode, etc.)
     context.restore();
   }
-
-
 
 //  //////////////////////////////////////////////////////////////
 //
@@ -2141,12 +1953,9 @@ public class PGraphicsFX2D extends PGraphics {
 //
 //  //public boolean is3D()  // false
 
-
-
   //////////////////////////////////////////////////////////////
 
   // PIMAGE METHODS
-
 
   @Override
   public void loadPixels() {
@@ -2156,9 +1965,8 @@ public class PGraphicsFX2D extends PGraphics {
     }
 
     if (!loaded) {
-      if (snapshotImage == null ||
-          snapshotImage.getWidth() != pixelWidth ||
-          snapshotImage.getHeight() != pixelHeight) {
+      if (snapshotImage == null || snapshotImage.getWidth() != pixelWidth
+          || snapshotImage.getHeight() != pixelHeight) {
         snapshotImage = new WritableImage(pixelWidth, pixelHeight);
       }
 
@@ -2169,19 +1977,17 @@ public class PGraphicsFX2D extends PGraphics {
       }
       snapshotImage = ((PSurfaceFX) surface).canvas.snapshot(sp, snapshotImage);
       PixelReader pr = snapshotImage.getPixelReader();
-      pr.getPixels(0, 0, pixelWidth, pixelHeight, argbFormat, pixels, 0, pixelWidth);
+      pr.getPixels(0, 0, pixelWidth, pixelHeight, argbFormat, pixels, 0,
+                   pixelWidth);
 
       loaded = true;
       modified = false;
     }
   }
 
-
-
   //////////////////////////////////////////////////////////////
 
   // GET/SET PIXELS
-
 
   @Override
   public int get(int x, int y) {
@@ -2189,16 +1995,14 @@ public class PGraphicsFX2D extends PGraphics {
     return super.get(x, y);
   }
 
-
   @Override
-  protected void getImpl(int sourceX, int sourceY,
-                         int sourceWidth, int sourceHeight,
-                         PImage target, int targetX, int targetY) {
+  protected void getImpl(int sourceX, int sourceY, int sourceWidth,
+                         int sourceHeight, PImage target, int targetX,
+                         int targetY) {
     loadPixels();
-    super.getImpl(sourceX, sourceY, sourceWidth, sourceHeight,
-                  target, targetX, targetY);
+    super.getImpl(sourceX, sourceY, sourceWidth, sourceHeight, target, targetX,
+                  targetY);
   }
-
 
   @Override
   public void set(int x, int y, int argb) {
@@ -2206,22 +2010,17 @@ public class PGraphicsFX2D extends PGraphics {
     super.set(x, y, argb);
   }
 
-
   @Override
-  protected void setImpl(PImage sourceImage,
-                         int sourceX, int sourceY,
-                         int sourceWidth, int sourceHeight,
-                         int targetX, int targetY) {
+  protected void setImpl(PImage sourceImage, int sourceX, int sourceY,
+                         int sourceWidth, int sourceHeight, int targetX,
+                         int targetY) {
     sourceImage.loadPixels();
 
     int sourceOffset = sourceX + sourceImage.pixelWidth * sourceY;
 
     PixelWriter pw = context.getPixelWriter();
-    pw.setPixels(targetX, targetY, sourceWidth, sourceHeight,
-                 argbFormat,
-                 sourceImage.pixels,
-                 sourceOffset,
-                 sourceImage.pixelWidth);
+    pw.setPixels(targetX, targetY, sourceWidth, sourceHeight, argbFormat,
+                 sourceImage.pixels, sourceOffset, sourceImage.pixelWidth);
 
     // Let's keep them loaded
     if (loaded) {
@@ -2235,22 +2034,16 @@ public class PGraphicsFX2D extends PGraphics {
     }
   }
 
-
   //////////////////////////////////////////////////////////////
 
   // MASK
 
-
-  static final String MASK_WARNING =
-    "mask() cannot be used on the main drawing surface";
-
+  static final String MASK_WARNING = "mask() cannot be used on the main drawing surface";
 
   @Override
   public void mask(PImage alpha) {
     showWarning(MASK_WARNING);
   }
-
-
 
   //////////////////////////////////////////////////////////////
 
@@ -2259,18 +2052,13 @@ public class PGraphicsFX2D extends PGraphics {
   // Because the PImage versions call loadPixels() and
   // updatePixels(), no need to override anything here.
 
+  // public void filter(int kind)
 
-  //public void filter(int kind)
-
-
-  //public void filter(int kind, float param)
-
-
+  // public void filter(int kind, float param)
 
   //////////////////////////////////////////////////////////////
 
   // COPY
-
 
 //  @Override
 //  public void copy(int sx, int sy, int sw, int sh,
@@ -2285,7 +2073,6 @@ public class PGraphicsFX2D extends PGraphics {
 //    }
 //  }
 
-
 //  @Override
 //  public void copy(PImage src,
 //                   int sx, int sy, int sw, int sh,
@@ -2295,34 +2082,24 @@ public class PGraphicsFX2D extends PGraphics {
 //                 sx, sy, sx + sw, sy + sh, null);
 //  }
 
-
-
   //////////////////////////////////////////////////////////////
 
   // BLEND
 
+  // static public int blendColor(int c1, int c2, int mode)
 
-  //static public int blendColor(int c1, int c2, int mode)
+  // public void blend(int sx, int sy, int sw, int sh,
+  // int dx, int dy, int dw, int dh, int mode)
 
-
-  //public void blend(int sx, int sy, int sw, int sh,
-  //                  int dx, int dy, int dw, int dh, int mode)
-
-
-  //public void blend(PImage src,
-  //                  int sx, int sy, int sw, int sh,
-  //                  int dx, int dy, int dw, int dh, int mode)
-
-
+  // public void blend(PImage src,
+  // int sx, int sy, int sw, int sh,
+  // int dx, int dy, int dw, int dh, int mode)
 
   //////////////////////////////////////////////////////////////
 
   // SAVE
 
-
-  //public void save(String filename)
-
-
+  // public void save(String filename)
 
   //////////////////////////////////////////////////////////////
 
@@ -2330,7 +2107,7 @@ public class PGraphicsFX2D extends PGraphics {
    * Display a warning that the specified method is simply unavailable.
    */
   static public void showTodoWarning(String method, int issue) {
-    showWarning(method + "() is not yet available: " +
-                "https://github.com/processing/processing/issues/" + issue);
+    showWarning(method + "() is not yet available: "
+        + "https://github.com/processing/processing/issues/" + issue);
   }
 }

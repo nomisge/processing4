@@ -22,7 +22,7 @@
 
 package processing.javafx;
 
-import com.sun.glass.ui.Screen;
+//import com.sun.glass.ui.Screen;
 
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -60,6 +60,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.stage.Screen;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
@@ -272,10 +273,10 @@ public class PSurfaceFX implements PSurface {
       PApplet sketch = surface.sketch;
 
       // See JEP 263
-      float renderScale = Screen.getMainScreen().getRecommendedOutputScaleX();
+      double renderScale = Screen.getPrimary().getOutputScaleX();
       if (PApplet.platform == PConstants.MACOS) {
         for (Screen s : Screen.getScreens()) {
-          renderScale = Math.max(renderScale, s.getRecommendedOutputScaleX());
+          renderScale = Math.max(renderScale, s.getOutputScaleX());
         }
       }
       if (sketch.pixelDensity == 2 && renderScale < 2) {
