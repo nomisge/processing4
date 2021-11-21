@@ -1,3 +1,378 @@
+# Processing 4.0 beta 2
+
+*Revision 1277 – 4 October 2021*
+
+Had to put things down for a while after the big push to get beta 1 out the door. But now we're back with an update mostly focused on fixing a few things that were broken.
+
+
+## Lots of fixes
+
+* Export to Application no longer broken when using P2D or P3D on macOS. (Though if you're a macOS developer, we could [use some help](https://github.com/processing/processing4/issues/284)) [#249](https://github.com/processing/processing4/issues/249)
+
+* Allow imports with `color` in the name. This gets everyone's favorite toxiclibs working again. Got a fix from Sam, fingers crossed that it doesn't introduce new quirks. [#240](https://github.com/processing/processing4/issues/240), [#246](https://github.com/processing/processing4/pull/246)
+
+* Movie Maker no longer broken when there are spaces in the path to Processing. [#268](https://github.com/processing/processing4/issues/268)
+
+* Debugger was not working when selecting Debug from the menu, now fixed. [#282](https://github.com/processing/processing4/issues/282)
+
+* "Massachusetts Institue of Technology" typo in loading screen. Not actually a big fix, but lots of reports about this one. [#254](https://github.com/processing/processing4/issues/254)
+
+
+## …but it's still a beta
+
+Not everything is fixed yet. Here are a few of the more obvious:
+
+* The colors, theme, buttons, interface, icons, etc are not yet complete. We have the necessary help, we just need more time. [#48](https://github.com/processing/processing4/issues/48)
+
+* Windows: Editor cursor position is offset to the right when display scaling >100% [#226](https://github.com/processing/processing4/issues/226)
+
+* macOS: IDE cursor position is wrong if font size is changed in Preferences. This may be specific to multiple displays, when one is retina and the other is not. [#194](https://github.com/processing/processing4/issues/194)
+
+* Export to Application not working with the current video library. The video library isn't handled by me, but we keep hearing about it. Updates will be posted [here](https://github.com/processing/processing-video/issues/188).
+
+
+## Contributed Fixes
+
+I love getting help from the community. Thank you!
+
+* The welcome screen was persistent, even if you told it to go away. Oops. [#48](https://github.com/processing/processing4/issues/48), [#253](https://github.com/processing/processing4/issues/253)
+
+* Fix minor typos in the PWM code for the IO library. [#266](https://github.com/processing/processing4/pull/266)
+
+* French translation: fixed typos and added missing items. [#258](https://github.com/processing/processing4/pull/258)
+
+* Fixed for JSSC library layout and upstream updates. [#119](https://github.com/processing/processing4/issues/119), [#229](https://github.com/processing/processing4/pull/229)
+
+
+## Other Changes
+
+Things you may not actally notice.
+
+* Added `-Dpython.console.encoding=UTF-8` for Python Mode at the [request of jdf](https://github.com/jdf/Processing.py-Bugs/issues/322).
+
+* Removed translated URLs that are not actually translated. Some of the Help menu translations were pointed at ancient links. [#250](https://github.com/processing/processing4/issues/250)
+
+* Switch to getModifiersEx() in `processing.app` code. [#67](https://github.com/processing/processing4/issues/67)
+
+* Deal with getFontMetrics() deprecation warning in EditorToolbar.
+
+
+# Processing 4.0 beta 1
+
+*Revision 1276 – 9 August 2021*
+
+Celebrating the 20th anniversary of the very first Processing release (revision 0001) which was first posted to be shared as part of a workshop in Japan at Musashino Art University (https://dbn.media.mit.edu/workshops/musabi/). This is the 277th release.
+
+The primary goal for Processing 4 is to keep everyone's code running, even as operating systems, hardware, and hairlines continue to change.
+
+This beta release will become the default download on the site, which means that it is more stable, usable, and better than the 3.5.4 release from January 2020. It's hard to remember what things were like in January 2020. But if you must use pre-pandemic software, we'll be keeping the release online.
+
+
+## Highlights for Processing 4
+
+Here are some highlights for Processing 4, since this will be the first time a lot of people are taking 4.0 for a spin:
+
+* There's a new Movie Maker that creates MP4s and Animated GIFs!
+
+* You can bundle sketches as double-clickable `.pdez` files and Libraries/Modes/Tools as `.pdex` files for easy sharing and installation.
+
+* We're using Java 11, which should be faster, more up to date, and a lot more compatible with newer machines.
+
+* There have been many updates for the Video and Sound libraries as we chase Apple's ever-changing guidelines for what constitutes “safe” software.
+
+* For users more experienced with Java, you can now use newer language features! Sam Pottinger rewired the preprocessor (and brought us Java 11 support as well).
+
+
+## Changes since alpha 6
+
+A lot has changed! Trying to get everything in under the wire as we work to finalize 4.0.
+
+
+### Features and Updates
+
+* We've started work on refreshing the design. This round has a new set of colors, icons, a splash screen, and more. If you like them, great! If not, please hold your complaints. The internet doesn't need more negativity! We still have a lot of work to do, and we think you'll be happy with the final result.
+
+* It's now possible to bundle sketches into a single file to be loaded inside the PDE. This is done with `.pdez` files, which is a sketch folder saved as a `.zip` but with the extension changed to `.pdez`. This means you can post a sketch on the web as a `.pdez`, and someone with Processing can click the link and have it load directly in the PDE. [#73](https://github.com/processing/processing/issues/73), [#3987](https://github.com/processing/processing/issues/3987)
+
+* Similar to `.pdez` files, you can install Libraries, Modes, Tools, and Example sets (things that would normally be installed with the Contribution Manager) by renaming their `.zip` file to `.pdez`. Double-clicking a `.pdez` file will open it with Processing, and ask the user whether they'd like to install it.
+
+* It's now possible to do code completion and refactoring even when `.java` tabs are included in a sketch. Thanks Sam! [#157](https://github.com/processing/processing4/issues/157), [#230](https://github.com/processing/processing4/pull/230)
+
+* Moved the preferences to `~/.config/processing` on Linux instead of `~/.processing`. This means your settings will be reset, but for most, that will be more of a plus with 4.x. [#203]( https://github.com/processing/processing4/issues/203)
+
+* Initial update of the splash screen and icons. These still need some work: the icons are too muddy at smaller sizes, for instance.
+
+* The Welcome screen has been reset, so folks will see it again. We haven't made a decision on the Welcome screen for the final 4.0, but plan for it to be more useful than what's there now.
+
+* “Show Sketch Folder”, “Add File”, and “Export to Application” now require Untitled or Read-Only sketches to be saved first, which avoids a weird situation where the user is dealing with files in hidden temporary folders. [#2459](https://github.com/processing/processing/issues/2459)
+
+* The reference for Java Mode is now served up from a web server that lives inside the PDE. This means that the download has just a single file for the reference, instead of thousands of tiny `.html` files. Far fewer things to copy makes the installation process much smoother.
+
+
+### Bug Fixes
+
+* Really chatty console messages for longtime users who had older (like 2.x) settings files still on their machine.
+
+* IDE cursor position on Windows was going weird if display scaling used. [#226](https://github.com/processing/processing4/issues/226)
+
+* Only call `errorTable.updateTheme()` if the Mode is using an Error Table (Python was not).
+
+* `PShape.scale()` not working with `PShape.resetMatrix()` when P2D renderer is used. [#217](https://github.com/processing/processing4/issues/217), [#225](https://github.com/processing/processing4/pull/225)
+
+
+### Should Be Fixed
+
+Several things that should no longer be a problem based on updates we've done in 4.x, but not necessarily verified 100%.
+
+* Undo feature may have undesired results (Fixed in 4.0a4) [#4775](https://github.com/processing/processing/issues/4775)
+
+* HiDPI support for GNOME desktop. [#6059](https://github.com/processing/processing/issues/6059)
+
+* AppKit errors from P2D/P3D. [#5880](https://github.com/processing/processing/issues/5880)
+
+* Export Application broken in Processing 3.5.4 when using P2D or P3D renderers. [#5983](https://github.com/processing/processing/issues/5983)
+
+* Cannot run `rotateZ()` within the `PShape` class. [#5770](https://github.com/processing/processing/issues/5770)
+
+* `Profile GL4bc is not available on X11GraphicsDevice` error fixed with new JOGL release. [#6160](https://github.com/processing/processing/issues/6160), [#6154](https://github.com/processing/processing/issues/6154).
+
+* `Profile GL3bc is not available on X11GraphicsDevice` should also be fixed. [#5476](https://github.com/processing/processing/issues/5476)
+
+
+### Internal Changes
+
+Things you're unlikely to notice, but in case something seems off, it's better to make note of them in case you see a related problem pop up.
+
+* Now using JDK 11.0.12+7.
+
+* Cleaning up `suggestions.txt` handling and related code.
+
+* Removed code for pulling fonts from `JAVA_HOME/lib/fonts`, because it no longer exists in Java 11.
+
+* Update `EditorFooter.updateMode()` to `EditorFooter.updateTheme()` and add it to the code called by `Editor.updateTheme()`
+
+* Removed the JRE Downloader, because it's no longer necessary. [#155](https://github.com/processing/processing4/issues/155)
+
+* Changed `Messages.loge()` to `Messages.err()`.
+
+
+### Known Issues
+
+* Support for `.pdez` and `.pdex` is not yet complete on Linux. Please help! [#239](https://github.com/processing/processing4/issues/239)
+
+* Have I mentioned that the design of the icons, theme, layout, etc aren't finished?
+
+
+
+# Processing 4.0 alpha 6
+
+*Revision 1275 – 10 July 2021*
+
+Code completion is back!
+
+Added a new Movie Maker that creates MP4s and Animated GIFs!
+
+And a new color scheme sure to bring out the cranks!
+
+
+### New Features
+
+* Movie Maker has been rewritten and much improved! It can now directly create high quality MPEG-4 videos and Animated GIFs. Due to Apple [removing support for most video codecs](https://support.apple.com/en-us/HT202884) after macOS Mojave, we could no longer export QuickTime videos. The new Tool uses [FFmpeg](https://ffmpeg.org/) behind the scenes. The Tool also supports [Apple ProRes 4444](https://support.apple.com/en-us/HT202410), which is very high quality, and incidentally, the format that Apple's “QTMovieModernizer” formerly used to re-encode “legacy” video formats. [#6110](https://github.com/processing/processing/issues/6110)
+
+
+### Design and Themes
+
+* We've started work on refreshing the design. This round has a new set of colors. If you like them, great! If not, please hold your complaints. The internet doesn't need more negativity! We know some people won't like it, and we're [still working on it](https://twitter.com/ben_fry/status/1409968426093735941). We think you'll be happy with the final version—we have some exciting updates that we aren't yet ready to share, and it will all make more sense as the system comes together. [#48](https://github.com/processing/processing4/issues/48)
+
+* In the meantime, if you'd like to customize the colors, instructions are [here](https://github.com/processing/processing4/wiki/Themes).
+
+* The "4" icon and the current "About" screen are only placeholders. I was tired of looking at the 3.x design, and also needed to be able to tell the versions apart from one another. It's also necessary to start the replacement process: figuring out what things need to be updated when we incorporate the real versions.
+
+* All that said, major work underway for improvements to how the visual theme is handled. We hope to ship with a dark mode option as well. Stay tuned!
+
+* The splash screen handler has been rewritten because the Windows version in launch4j was too brittle. The downside is that it's a fraction of a second slower to show up, but the upside is that hi-res Linux and Windows displays get a nice 2x version instead of the crunchy low-fi (not in a good way) version.
+
+* Add `ui.font.family` and `ui.font.size` as preferences.
+
+* Added support for `0x` numbers to support alpha colors in `theme.txt`.
+
+
+### Bug Fixes
+
+* Code completion is fixed. Thanks [Sam](https://github.com/sampottinger)! [#177](https://github.com/processing/processing4/issues/177), [#219](https://github.com/processing/processing4/pull/219)
+
+* `mouseButton` was not set correctly on `mouseReleased()` with Java2D. [#181](https://github.com/processing/processing4/issues/181)
+
+* A more useful message for the `NoClassDefError: processing/core/PApplet` startup error on Windows was in the alpha 5 source, but may not have made it into the actual release. [#154](https://github.com/processing/processing4/issues/154)
+
+* Fix `Module javafx.base not found` on Linux. Thanks [letorbi](https://github.com/letorbi). [#214](https://github.com/processing/processing4/issues/214), [#215](https://github.com/processing/processing4/pull/215)
+
+* After selecting a font other than Source Code Pro, font went to a default. [#216](https://github.com/processing/processing4/pull/216)
+
+* `unregisterMethod()` was broken. [#223](https://github.com/processing/processing4/issues/223)
+
+* Fixed "No library found for org.w3c.dom" message when using that (built-in) package.
+
+
+### Changes
+
+* When changing to an incompatible Mode, just open a new window instead of giving the user a potentially confusing error message about it. [#189](https://github.com/processing/processing4/issues/189)
+
+
+### API Changes
+
+None of these should break anything, but if they do, please let us know!
+
+* `Editor.applyPreferences()` was `protected`, now it's `public`.
+
+* Removed `Editor.repaintErrorBar()` and `Editor.showConsole()` because they didn't appear to be in use. Holler if this breaks anything.
+
+* Renamed `TextAreaPainter.getCompositionTextpainter()` to `getCompositionTextPainter()`.
+
+
+### Internal Changes
+
+* Removed `java.class.path` when launching code from inside the PDE. This should prevent conflicts, and avoid introducing problems when using Export to Application.
+
+* Removed compound key actions (which were undocumented and not in use). This clears up a lot of complexity in `DefaultInputHandler`.
+
+* Remove `jdt.compiler.jar` from subprojects.
+
+* Cleaned up lots of dead/unused parts of `javafx/build.xml`.
+
+* Move `ISSUE_TEMPLATE` to the `.github` subfolder.
+
+* Removed extra files from Tools folders for the download.
+
+* Moved doclet to separate repo. Thanks DSI! [#218](https://github.com/processing/processing4/issues/218), [#222](https://github.com/processing/processing4/pull/222)
+
+
+
+# Processing 4.0 alpha 5
+
+*Revision 1274 – 24 June 2021*
+
+Sneaking a release out the door the morning before our company meeting. Don't tell my boss, he's kind of a jerk.
+
+
+### Known Bugs
+
+* Code completion is currently broken. Any updates will be posted [here](https://github.com/processing/processing4/issues/177).
+
+* Plenty of other issues being tracked in the [Processing 4](https://github.com/processing/processing4/issues) and [Processing 3](https://github.com/processing/processing/issues) repositories. Please help!
+
+
+### Updates and Additions
+
+* Added a [few more](https://github.com/processing/processing4/commit/7b75acf2799f61c9c22233f38ee73c07635cea14) “entitlements” to the macOS release that may help with using the Video and Sound libraries, especially on Big Sur.
+
+* Moved from the 11.0.2 LTS version of JavaFX to the in-progress version 16. This fixes a [garbled text](https://bugs.openjdk.java.net/browse/JDK-8234916) issue that was breaking Tools that used JavaFX.
+
+* JavaFX has been moved out of core and into a separate library. After Java 8, it's no longer part of the JDK, so it requires additional files that were formerly included by default. The Processing version of that library comes in at 180 MB, which seems excessive to include with every project, regardless of whether it's used. (And that's not including the full Webkit implementation, which adds \~80 MB per platform.)
+
+* JavaFX is back and working again! This also fixes some Tools that relied on it, and Export to Application should be working as well. [#110](https://github.com/processing/processing4/issues/110), [#112](https://github.com/processing/processing4/pull/112), [#3288](https://github.com/processing/processing/issues/3288), [#209](https://github.com/processing/processing4/issues/209), [#210](https://github.com/processing/processing4/issues/210)
+
+
+### Other Fixes and Changes
+
+* Major font cleanup inside Preferences. It appears that the “Monospace” font may be [missing or broken](https://www.oracle.com/java/technologies/javase/11-relnote-issues.html#JDK-8191522) with OpenJDK 11. Does it show a random sans serif for you? Let us know if it does. But aside from that, the Editor and Console font should be behaving a little more reliably.
+
+* The Windows splash screen should no longer be tiny. Still sorting out some hidpi issues on Windows, but this one might make things a bit less quirky. [#4896](https://github.com/processing/processing/issues/4896), [#145](https://github.com/processing/processing4/issues/145)
+
+* Better handling of `NoClassDefError: processing/core/PApplet` on startup with Windows 10. [#154](https://github.com/processing/processing4/issues/154)
+
+* No longer using `JFileChooser` on macOS; it's too awful. This means a Copy/Paste issue comes back, but the cure was worse than the disease. [#1035](https://github.com/processing/processing/issues/1035), [#77](https://github.com/processing/processing4/issues/77)
+
+
+### Internal Changes
+
+* The minimum system version for macOS (for the PDE and exported applications) is now set to 10.14.6 (the last update of Mojave). 10.13 (High Sierra) is no longer supported by Apple as of September or December 2020 (depending on what you read), and for our sanity, we're dropping it as well.
+
+* Updated JNA from 5.7.0 to 5.8.0.
+
+* Removed the `ant` binary from the repo, and updated the version we're using from 1.8.2 to 1.10.10.
+
+* Rebuilt the `appbundler` tool for macOS to handle some recent changes, and disabled some logging chatter as well.
+
+* Update to launch4j 3.14, fixing Export to Application on Windows.
+
+
+# Processing 4.0 alpha 4
+
+*Revision 1273 - 15 June 2021*
+
+Happy birthday to my goddaughter Kelsey! Let's celebrate with another alpha release.
+
+This should be a bit more stable than the last round. I've rolled back some of the more aggressive anti-AWT changes (bad for longevity, good for compatibility) so images in particular are now behaving better.
+
+But enough of that, let's go to the phone lines:
+
+
+### What bugs have been fixed; why should I care?
+
+* Sketch window location is saved once again: re-running a sketch will open the window in the same location. This was broken for a while! [#158](https://github.com/processing/processing4/issues/158), [#5843](https://github.com/processing/processing/issues/5843), [#5781](https://github.com/processing/processing/issues/5781)
+
+* When using multiple monitors, new Editor windows will open on the same display as the most recently opened Editor window. [#205](https://github.com/processing/processing4/issues/205), formerly [#1566](https://github.com/processing/processing/issues/1566)
+
+* A major Undo fix, this may even be [the big one](https://github.com/processing/processing/issues/4775), but it's not confirmed. (Please help confirm!) [#175](https://github.com/processing/processing4/pull/175)
+
+
+### Were you too hasty with exorcising AWT?
+
+* `cursor(PImage)` broken everywhere because `PImage.getNative()` returns `null` [#180](https://github.com/processing/processing4/issues/180)
+
+* `PImage.resize()` not working properly. [#200](https://github.com/processing/processing4/issues/200)
+
+* `copy()` not working correctly. [#169](https://github.com/processing/processing4/issues/169)
+
+
+### Did you find any particularly niggling, but small issues?
+
+* Catch `NoClassDefError` in `Platform.deleteFile()` (still unclear of its cause) on Big Sur. [#159](https://github.com/processing/processing4/issues/159), [#6185](https://github.com/processing/processing/issues/6185)
+
+* Fixed `Exception in thread "Contribution Uninstaller" NullPointerException` when removing an installed contribution. [#174](https://github.com/processing/processing4/issues/174)
+
+* If the default display is selected in the Preferences window, store that, rather than its number. It was discovered that plugging in a second display could bump the “default” display to number 2, even while it was still selected. Yay!
+
+* Sort out calling `unregisterMethod()` for `dispose` from `dispose()` makes for bad state situation. [#199](https://github.com/processing/processing4/pull/199)
+
+
+### How about contributions from the community?
+
++ Don't sort user's charset array when calling `createFont()`. [#197](https://github.com/processing/processing4/issues/197), [#198](https://github.com/processing/processing4/pull/198)
+
+* Some exciting things are on the way for the documentation and web site. [#191](https://github.com/processing/processing4/pull/191)
+
+* Update Batik to 1.14. [#179](https://github.com/processing/processing4/issues/179), [#192](https://github.com/processing/processing4/issues/192), [#183](https://github.com/processing/processing4/pull/183)
+
+* Tweak the circle for number of updates based on Akarshit's initial attempt. [#201](https://github.com/processing/processing4/issues/201), [#4097](https://github.com/processing/processing/pull/4097)
+
+* Make `parseJSONObject()` and `parseJSONArray()` return `null` when parsing fails. [#165](https://github.com/processing/processing4/issues/165), [#166](https://github.com/processing/processing4/pull/166)
+
+
+### Is there anything new?
+
++ Added `PVector.setHeading()` for parity with p5.js. [#193](https://github.com/processing/processing4/issues/193)
+
+* The default font (what you get if `textFont()` isnot used) has been changed to Source Sans instead of Lucida Sans. I just couldn't take Lucida any longer.
+
+
+### Were there any internal changes I probably won't notice?
+
+* Updated to JDK 11.0.11+9
+
+* Update from JNA 5.2.0 to 5.7.0
+
+* Modernize the RegisteredMethods code to use collections classes w/ concurrency. [#199](https://github.com/processing/processing4/pull/199)
+
+* Set closed issues to [automatically lock](https://github.com/dessant/lock-threads) after they've been closed for 30 days. (This has no effect on open issues, only closed ones.) Actually this one you may have noticed if you had a lot of notifications turned on.
+
+* Slowly transitioning some of the older code to newer syntax (lambda functions, etc). This is not a priority for anyone else: it's being done slowly, and as a chance to do code review on some very old work.
+
+
+* Fix `textMode(SHAPE) is not supported by this renderer` message with SVG Export. [#202](https://github.com/processing/processing4/issues/202), [#6169](https://github.com/processing/processing/issues/6169)
+
+
 # Processing 4.0 alpha 3
 
 *Revision 1272 - 17 January 2021*

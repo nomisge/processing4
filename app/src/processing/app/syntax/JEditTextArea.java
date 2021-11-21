@@ -80,9 +80,9 @@ public class JEditTextArea extends JComponent
 
   private InputMethodSupport inputMethodSupport;
 
-  private TextAreaDefaults defaults;
+  private final TextAreaDefaults defaults;
 
-  private Brackets bracketHelper = new Brackets();
+  private final Brackets bracketHelper = new Brackets();
 
   private FontMetrics cachedPartialPixelWidthFont;
   private float partialPixelWidth;
@@ -102,11 +102,9 @@ public class JEditTextArea extends JComponent
     enableEvents(AWTEvent.KEY_EVENT_MASK);
 
     if (!DISABLE_CARET) {
-      caretTimer = new Timer(500, new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          if (hasFocus()) {
-            blinkCaret();
-          }
+      caretTimer = new Timer(500, e -> {
+        if (hasFocus()) {
+          blinkCaret();
         }
       });
       caretTimer.setInitialDelay(500);
@@ -130,6 +128,20 @@ public class JEditTextArea extends JComponent
     add(RIGHT, vertical = new JScrollBar(Adjustable.VERTICAL));
     add(BOTTOM, horizontal = new JScrollBar(Adjustable.HORIZONTAL));
 
+    /*
+    vertical.setBackground(Color.YELLOW);
+    horizontal.setBackground(Color.YELLOW);
+
+    System.out.println(vertical.getUI());
+    //vertical.setUI(new javax.swing.plaf.basic.BasicScrollBarUI() {
+    vertical.setUI(new com.apple.laf.AquaScrollBarUI() {
+      @Override
+      protected void configureScrollBarColors() {
+        this.thumbColor = Color.GREEN;
+      }
+    });
+    */
+
     // Add some event listeners
     vertical.addAdjustmentListener(new AdjustHandler());
     horizontal.addAdjustmentListener(new AdjustHandler());
@@ -152,13 +164,10 @@ public class JEditTextArea extends JComponent
     // We don't seem to get the initial focus event?
 //    focusedComponent = this;
 
-    addMouseWheelListener(new MouseWheelListener() {
-
-      @Override
-      public void mouseWheelMoved(MouseWheelEvent e) {
-        if (scrollBarsInitialized) {
-          if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-            int scrollAmount = e.getUnitsToScroll();
+    addMouseWheelListener(e -> {
+      if (scrollBarsInitialized) {
+        if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
+          int scrollAmount = e.getUnitsToScroll();
 //            System.out.println("rot/amt = " + e.getWheelRotation() + " " + amt);
 //            int max = vertical.getMaximum();
 //            System.out.println("UNIT SCROLL of " + amt + " at value " + vertical.getValue() + " and max " + max);
@@ -174,14 +183,13 @@ public class JEditTextArea extends JComponent
 //            }
 //            System.out.println("  " + e);
 
-            // inertia scrolling on OS X will fire several shift-wheel events
-            // that are negative values.. this makes the scrolling area jump.
-            boolean isHorizontal = Platform.isMacOS() && e.isShiftDown();
-            if (isHorizontal) {
-              horizontal.setValue(horizontal.getValue() + scrollAmount);
-            }else{
-              vertical.setValue(vertical.getValue() + scrollAmount);
-            }
+          // inertia scrolling on OS X will fire several shift-wheel events
+          // that are negative values.. this makes the scrolling area jump.
+          boolean isHorizontal = Platform.isMacOS() && e.isShiftDown();
+          if (isHorizontal) {
+            horizontal.setValue(horizontal.getValue() + scrollAmount);
+          }else{
+            vertical.setValue(vertical.getValue() + scrollAmount);
           }
         }
       }
@@ -189,9 +197,17 @@ public class JEditTextArea extends JComponent
   }
 
 
+  public void updateTheme() {
+    // This default version will update the fonts and not much else.
+    // It's expected to always be overridden by the PdeTextArea version,
+    // but it's here if a Mode author *really* must avoid PdeTextArea.
+    painter.updateTheme();
+    repaint();
+  }
+
+
   /**
    * Override this to provide your own painter for this {@link JEditTextArea}.
-   * @param defaults
    * @return a newly constructed {@link TextAreaPainter}.
    */
   protected TextAreaPainter createPainter(final TextAreaDefaults defaults) {
@@ -922,9 +938,11 @@ public class JEditTextArea extends JComponent
     int length = getLineLength(line);
     String str = getText(offset, length);
 
-    for(int i = 0; i < str.length(); i++) {
-      if(!Character.isWhitespace(str.charAt(i))) {
-        return offset + i;
+    if (str != null) {
+      for (int i = 0; i < str.length(); i++) {
+        if (!Character.isWhitespace(str.charAt(i))) {
+          return offset + i;
+        }
       }
     }
     return offset + length;
@@ -948,9 +966,11 @@ public class JEditTextArea extends JComponent
     int length = getLineLength(line);
     String str = getText(offset - length - 1, length);
 
-    for (int i = 0; i < length; i++) {
-      if(!Character.isWhitespace(str.charAt(length - i - 1))) {
-        return offset - i;
+    if (str != null) {
+      for (int i = 0; i < length; i++) {
+        if (!Character.isWhitespace(str.charAt(length - i - 1))) {
+          return offset - i;
+        }
       }
     }
     return offset - length;
@@ -1654,11 +1674,7 @@ public class JEditTextArea extends JComponent
       String selection = getSelectedText();
       if (selection != null) {
         int repeatCount = inputHandler.getRepeatCount();
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < repeatCount; i++)
-          sb.append(selection);
-
-        clipboard.setContents(new StringSelection(sb.toString()), null);
+        clipboard.setContents(new StringSelection(selection.repeat(Math.max(0, repeatCount))), null);
       }
     }
   }
@@ -1689,10 +1705,8 @@ public class JEditTextArea extends JComponent
         + getTextAsHtml(null) + "\n</pre></body></html>");
 
     Clipboard clipboard = processing.app.ui.Toolkit.getSystemClipboard();
-    clipboard.setContents(formatted, new ClipboardOwner() {
-      public void lostOwnership(Clipboard clipboard, Transferable contents) {
-        // I don't care about ownership
-      }
+    clipboard.setContents(formatted, (clipboard1, contents) -> {
+      // I don't care about ownership
     });
   }
 
@@ -1824,7 +1838,9 @@ public class JEditTextArea extends JComponent
     } else if (c == '"') {
       buffer.append("&quot;");
     } else if (c > 127) {
-      buffer.append("&#" + ((int) c) + ";");  // use unicode entity
+      buffer.append("&#");  // use unicode entity
+      buffer.append((int) c);  // use unicode entity
+      buffer.append(';');  // use unicode entity
     } else {
       buffer.append(c);  // normal character
     }
@@ -1876,11 +1892,7 @@ public class JEditTextArea extends JComponent
         }
 
         int repeatCount = inputHandler.getRepeatCount();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < repeatCount; i++) {
-          sb.append(selection);
-        }
-        selection = sb.toString();
+        selection = selection.repeat(Math.max(0, repeatCount));
         setSelectedText(selection);
 
       } catch (Exception e) {
@@ -2189,9 +2201,9 @@ public class JEditTextArea extends JComponent
           centerHeight);
 
       // Lay out all status components, in order
-      Enumeration status = leftOfScrollBar.elements();
+      Enumeration<Component> status = leftOfScrollBar.elements();
       while (status.hasMoreElements()) {
-        Component comp = (Component)status.nextElement();
+        Component comp = status.nextElement();
         Dimension dim = comp.getPreferredSize();
         comp.setBounds(ileft,
             itop + centerHeight,
@@ -2210,18 +2222,8 @@ public class JEditTextArea extends JComponent
     private Component center;
     private Component right;
     private Component bottom;
-    private Vector leftOfScrollBar = new Vector();
+    private final Vector<Component> leftOfScrollBar = new Vector<>();
   }
-
-//  static class CaretBlinker implements ActionListener
-//  {
-//    public void actionPerformed(ActionEvent evt)
-//    {
-//      if(focusedComponent != null
-//          && focusedComponent.hasFocus())
-//        focusedComponent.blinkCaret();
-//    }
-//  }
 
   class MutableCaretEvent extends CaretEvent
   {
@@ -2251,14 +2253,11 @@ public class JEditTextArea extends JComponent
       // If this is not done, mousePressed events accumulate
       // and the result is that scrolling doesn't stop after
       // the mouse is released
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run()
-        {
-          if (evt.getAdjustable() == vertical) {
-            setFirstLine(vertical.getValue());
-          } else {
-            setHorizontalOffset(-horizontal.getValue());
-          }
+      SwingUtilities.invokeLater(() -> {
+        if (evt.getAdjustable() == vertical) {
+          setFirstLine(vertical.getValue());
+        } else {
+          setHorizontalOffset(-horizontal.getValue());
         }
       });
     }
@@ -2347,7 +2346,7 @@ public class JEditTextArea extends JComponent
         try {
           select(getMarkPosition(), xyToOffset(evt.getX(), evt.getY()));
         } catch (ArrayIndexOutOfBoundsException e) {
-          Messages.loge("xToOffset problem", e);
+          Messages.err("xToOffset problem", e);
         }
       } else {
         int line = yToLine(evt.getY());

@@ -27,8 +27,8 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.HashMap;
 import java.util.Map;
 
-import processing.app.Mode;
 import processing.app.ui.Editor;
+import processing.app.ui.Theme;
 
 
 /**
@@ -61,8 +61,7 @@ public class PdeTextArea extends JEditTextArea {
     add(CENTER, painter);
 
     // load settings from theme.txt
-    Mode mode = editor.getMode();
-    gutterGradient = mode.makeGradient("editor", Editor.LEFT_GUTTER, 500);
+    gutterGradient = Theme.makeGradient("editor", Editor.LEFT_GUTTER, 500);
   }
 
 
@@ -77,8 +76,16 @@ public class PdeTextArea extends JEditTextArea {
   }
 
 
+  /*
   public void setMode(Mode mode) {
     ((PdeTextAreaPainter) painter).setMode(mode);
+  }
+  */
+
+  @Override
+  public void updateTheme() {
+    ((PdeTextAreaPainter) painter).updateTheme();
+    repaint();
   }
 
 
